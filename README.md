@@ -2,7 +2,18 @@
 
 Terraform Module to simplify the creation of complex AWS VPC Networking configurations.  With a layer of abstraction, you can create multiple vpcs and connect them with Transit Gateway through configurations.  Control NACLs, Security Groups and Routing with simple shorthand reference to the VPC and aws-networking module to ensure the correct values are substituted.  VPC CIDR assignments are derived from the account level IPAM pool and auto assigns VPC CIDRs and Subnet CIDRs.
 
-## Examples
+# Contents
+- [Usage Example](#usage-example)
+- [Module Requirements](#requirements)
+- [Module Providers](#providers)
+- [Module Resources](#resources)
+- [Module Inputs](#inputs)
+- [Module Inputs - network_config](#network-configuration-inputs)
+- [Major Revision Updates](#major-revision-updates)
+- [Required Permissions](#required-permissions)
+- [License](#license)
+
+## Usage Example
 ```
 variables {
   project_name           = "projecta"
@@ -307,6 +318,157 @@ The following example will create:
 12. Private Interface Gateway will associate interface gateway with private subnets only.
 13. Transit Gateway with VPC assignment.
 14. Transit Gateway route updates for every route table in the assigned VPC.
+
+## Required Permissions
+```
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Sid": "IPAMActions",
+			"Effect": "Allow",
+			"Action": [
+				"ec2:ModifyIpam",
+				"ec2:GetIpamResourceCidrs",
+				"ec2:GetIpamPoolCidrs",
+				"ec2:DescribeIpamScopes",
+				"ec2:CreateTags",
+				"ec2:CreateIpamPool",
+				"ec2:ModifyIpamScope",
+				"ec2:DescribeIpamPools",
+				"ec2:DeleteIpam",
+				"ec2:CreateIpam",
+				"ec2:ModifyIpamPool",
+				"ec2:DeleteIpamScope",
+				"ec2:DeprovisionIpamPoolCidr",
+				"ec2:CreateIpamScope",
+				"ec2:AllocateIpamPoolCidr",
+				"ec2:ReleaseIpamPoolAllocation",
+				"ec2:DescribeIpams",
+				"ec2:ProvisionIpamPoolCidr",
+				"ec2:DeleteIpamPool",
+				"ec2:GetIpamPoolAllocations",
+				"iam:CreateServiceLinkedRole"
+			],
+			"Resource": "*"
+		},
+		{
+			"Sid": "VPCActions",
+			"Effect": "Allow",
+			"Action": [
+				"ec2:AllocateAddress",
+				"ec2:AssignIpv6Addresses",
+				"ec2:AssignPrivateIpAddresses",
+				"ec2:AssociateAddress",
+				"ec2:AssociateRouteTable",
+				"ec2:AssociateSubnetCidrBlock",
+				"ec2:AssociateVpcCidrBlock",
+				"ec2:AttachInternetGateway",
+				"ec2:AttachNetworkInterface",
+				"ec2:AuthorizeSecurityGroupIngress",
+				"ec2:AuthorizeSecurityGroupEgress",
+				"ec2:CreateDefaultSubnet",
+				"ec2:CreateDefaultVpc",
+				"ec2:CreateInternetGateway",
+				"ec2:CreateNatGateway",
+				"ec2:CreateTransitGateway",
+				"ec2:CreateTransitGatewayRoute",
+				"ec2:CreateTransitGatewayRouteTable",
+				"ec2:CreateTransitGatewayVpcAttachment",
+				"ec2:DeleteTransitGateway",
+				"ec2:DeleteTransitGatewayRoute",
+				"ec2:DeleteTransitGatewayRouteTable",
+				"ec2:DeleteTransitGatewayVpcAttachment",
+				"ec2:DescribeTransitGatewayAttachments",
+				"ec2:DescribeTransitGatewayRouteTables",
+				"ec2:DescribeTransitGatewayVpcAttachments",
+				"ec2:DescribeTransitGateways",
+				"ec2:DescribePrefixLists",
+				"ec2:ModifyTransitGateway",
+				"ec2:ModifyTransitGatewayVpcAttachment",
+				"ec2:CreateNetworkAcl",
+				"ec2:CreateNetworkAclEntry",
+				"ec2:CreateNetworkInterface",
+				"ec2:CreateNetworkInterfacePermission",
+				"ec2:CreateRoute",
+				"ec2:CreateRouteTable",
+				"ec2:CreateSecurityGroup",
+				"ec2:CreateSubnet",
+				"ec2:CreateTags",
+				"ec2:CreateVpc",
+				"ec2:CreateVpcEndpoint",
+				"ec2:CreateVpcEndpointServiceConfiguration",
+				"ec2:DeleteInternetGateway",
+				"ec2:DeleteNatGateway",
+				"ec2:DeleteNetworkAcl",
+				"ec2:DeleteNetworkAclEntry",
+				"ec2:DeleteNetworkInterface",
+				"ec2:DeleteNetworkInterfacePermission",
+				"ec2:DeleteRoute",
+				"ec2:DeleteRouteTable",
+				"ec2:DeleteSecurityGroup",
+				"ec2:DeleteSubnet",
+				"ec2:DeleteTags",
+				"ec2:DeleteVpc",
+				"ec2:DeleteVpcEndpoints",
+				"ec2:DeleteVpcEndpointServiceConfigurations",
+				"ec2:DescribeAccountAttributes",
+				"ec2:DescribeAddresses",
+				"ec2:DescribeAvailabilityZones",
+				"ec2:DescribeInternetGateways",
+				"ec2:DescribeIpv6Pools",
+				"ec2:DescribeNatGateways",
+				"ec2:DescribeNetworkAcls",
+				"ec2:DescribeNetworkInterfaceAttribute",
+				"ec2:DescribeNetworkInterfacePermissions",
+				"ec2:DescribeNetworkInterfaces",
+				"ec2:DescribeRouteTables",
+				"ec2:DescribeSecurityGroupReferences",
+				"ec2:DescribeSecurityGroupRules",
+				"ec2:DescribeSecurityGroups",
+				"ec2:DescribeStaleSecurityGroups",
+				"ec2:DescribeSubnets",
+				"ec2:DescribeTags",
+				"ec2:DescribeVpcAttribute",
+				"ec2:DescribeVpcEndpointConnections",
+				"ec2:DescribeVpcEndpoints",
+				"ec2:DescribeVpcEndpointServiceConfigurations",
+				"ec2:DescribeVpcEndpointServicePermissions",
+				"ec2:DescribeVpcEndpointServices",
+				"ec2:DescribeVpcs",
+				"ec2:DetachInternetGateway",
+				"ec2:DetachNetworkInterface",
+				"ec2:DisassociateAddress",
+				"ec2:DisassociateRouteTable",
+				"ec2:DisassociateSubnetCidrBlock",
+				"ec2:DisassociateVpcCidrBlock",
+				"ec2:GetSecurityGroupsForVpc",
+				"ec2:GetTransitGatewayRouteTableAssociations",
+				"ec2:GetTransitGatewayRouteTablePropagations",
+				"ec2:ModifyNetworkInterfaceAttribute",
+				"ec2:ModifySecurityGroupRules",
+				"ec2:ModifySubnetAttribute",
+				"ec2:ModifyVpcAttribute",
+				"ec2:ModifyVpcEndpoint",
+				"ec2:ModifyVpcEndpointServiceConfiguration",
+				"ec2:ModifyVpcEndpointServicePermissions",
+				"ec2:RejectVpcEndpointConnections",
+				"ec2:ReleaseAddress",
+				"ec2:ReplaceNetworkAclAssociation",
+				"ec2:ReplaceNetworkAclEntry",
+				"ec2:ReplaceRoute",
+				"ec2:ReplaceRouteTableAssociation",
+				"ec2:ResetNetworkInterfaceAttribute",
+				"ec2:RevokeSecurityGroupEgress",
+				"ec2:RevokeSecurityGroupEgress",
+				"ec2:UnassignIpv6Addresses",
+				"ec2:UnassignPrivateIpAddresses"
+			],
+			"Resource": "*"
+		}
+	]
+}
+```
 
 ## License
 
