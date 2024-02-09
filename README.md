@@ -1,11 +1,12 @@
-# terraform-aws-networking ![GitHub Release](https://img.shields.io/github/v/release/stajkowski/aws-networking)
-Terraform Module to simplify the creation of complex AWS VPC Networking configurations.  With a layer of abstraction, you can create multiple vpcs and connect them with Transit Gateway through configurations.  Control NACLs, Security Groups and Routing with simple shorthand reference to the VPC, and aws-networking module to ensure the correct values are substituted.  VPC CIDR assignments are derived from the account level IPAM pool and auto assigns VPC CIRDs and Subnet CIDRs.
+# terraform-aws-networking ![GitHub Release](https://img.shields.io/github/v/release/stajkowski/aws-networking) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/stajkowski/terraform-aws-networking/development.yml) ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/stajkowski/terraform-aws-networking)
+
+Terraform Module to simplify the creation of complex AWS VPC Networking configurations.  With a layer of abstraction, you can create multiple vpcs and connect them with Transit Gateway through configurations.  Control NACLs, Security Groups and Routing with simple shorthand reference to the VPC and aws-networking module to ensure the correct values are substituted.  VPC CIDR assignments are derived from the account level IPAM pool and auto assigns VPC CIDRs and Subnet CIDRs.
 
 ## Examples
 ```
 variables {
-  environment            = "test"
   project_name           = "projecta"
+  environment            = "test"
   parent_pool_cidr_block = "10.0.0.0/8"
   network_config = {
     vpcs = {
@@ -185,22 +186,22 @@ variables {
 module "aws-networking" {
   source  = "stajkowski/networking/aws"
   version = "1.0.0"
-  project_name = "projecta"
-  environment = var.environment
-  parent_pool_cidr_block = var.parent_cidr
+  project_name = local.project_name
+  environment = local.environment
+  parent_pool_cidr_block = local.parent_pool_cidr_block
   network_config = local.env_network_config[var.environment]
 }
 ```
 The following example will create:
 
 1. A parent IPAM pool with CIDR 10.0.0.0/8
-2. 2 VPCs, one name "egress" and the other named "infra1" with CIDRs assigned from the parent pool.
+2. 2 VPCs, one named "egress" and the other named "infra1" with CIDRs assigned from the parent pool.
 3. In the "egress" VPC, 2 public subnets and 2 private with CIDRs assigned from the "egress" VPC pool.
 4. In the "infra1" VPC, 2 private subnets with CIDRs assigned from the "infra1" VPC pool.
 5. In the "egress" VPC, 1 public route table and 2 private route tables (NAT Gateway HA).
 6. In the "infra1" VPC, 1 private route table.
 6. NACLs for each public/private subnet and assigned.
-7. In the "egress" VPC, an Internet Gateway and 2 NAT Gateways (NAT GW in each private subnet).
+7. In the "egress" VPC, an Internet Gateway and 2 NAT Gateways (NAT GW in each public subnet).
 8. In the "egress" VPC, a VPCE Gateway is added for "s3" in the public/private route tables.
 8. In the "egress" VPC, private link support is added ("ec2 &"sts") to each private subnet since scope is "private".
 9. In the "infra1" VPC, private link support is added ("ec2 &"sts") to each private subnet since scope is "private".
@@ -216,36 +217,49 @@ The following example will create:
 | Name      | Version   |
 |-----------|-----------|
 | Terraform | >= 1.0.0  |
-| aws       | ~> 5.34.0 |
+| aws       | ~> 5.0.0 |
 
 ## Providers
 
 | Name      | Version   |
 |-----------|-----------|
-| aws       | ~> 5.34.0 |
+| aws       | ~> 5.0.0 |
 
 ## Resources
 
-| Name      | Type   |
-|-----------|-----------|
-| aws_ec2_transit_gateway       | resource |
-| aws_ec2_transit_gateway_vpc_attachment       | resource |
-| aws_eip       | resource |
-| aws_internet_gateway       | resource |
-| aws_nat_gateway       | resource |
-| aws_network_acl       | resource |
-| aws_network_acl_rule       | resource |
-| aws_network_acl_association       | resource |
-| aws_route       | resource |
-| aws_route_table       | resource |
-| aws_route_table_association       | resource |
-| aws_subnet       | resource |
-| aws_vpc_endpoint       | resource |
-| aws_vpc_ipam       | resource |
-| aws_vpc_ipam_pool       | resource |
-| aws_vpc_ipam_pool_cidr       | resource |
-| aws_vpc_ipam_pool_cidr_allocation       | resource |
-| aws_vpc       | resource |
+| Name                                                        | Type     |
+|-------------------------------------------------------------|----------|
+| aws_ec2_transit_gateway.transit_gateway                     | resource |
+| aws_ec2_transit_gateway_vpc_attachment.transit_gateway      | resource |
+| aws_eip.nat_eip                                             | resource |
+| aws_internet_gateway.igw                                    | resource |
+| aws_nat_gateway.nat_gw                                      | resource |
+| aws_network_acl.private_subnet_nacl                         | resource |
+| aws_network_acl.public_subnet_nacl                          | resource |
+| aws_network_acl_association.private_subnet_nacl_association | resource |
+| aws_network_acl_association.public_subnet_nacl_association  | resource |
+| aws_network_acl_rule.private_subnet_nacl_rules              | resource |
+| aws_network_acl_rule.public_subnet_nacl_rules               | resource |
+| aws_route.igw_default_route                                 | resource |
+| aws_route.nat_gw_default_route                              | resource |
+| aws_route.tgw_route                                         | resource |
+| aws_route_table.private_route_table                         | resource |
+| aws_route_table.public_route_table                          | resource |
+| aws_route_table_association.private_subnet_association      | resource |
+| aws_route_table_association.public_subnet_association       | resource |
+| aws_security_group.vpc_default_sg                           | resource |
+| aws_subnet.private_subnet                                   | resource |
+| aws_subnet.public_subnet                                    | resource |
+| aws_vpc.vpc_network                                         | resource |
+| aws_vpc_endpoint.vpc_gateway_endpoint                       | resource |
+| aws_vpc_endpoint.vpc_interface_endpoint                     | resource |
+| aws_vpc_ipam.account_ipam                                   | resource |
+| aws_vpc_ipam_pool.acct_ipam_pool                            | resource |
+| aws_vpc_ipam_pool.vpc_subnet_ipam_pool                      | resource |
+| aws_vpc_ipam_pool_cidr.acct_ipam_pool_cidr                  | resource |
+| aws_vpc_ipam_pool_cidr.vpc_subnet_ipam_pool_cidr            | resource |
+| aws_vpc_ipam_pool_cidr_allocation.vpc_ipam_pool_private     | resource |
+| aws_vpc_ipam_pool_cidr_allocation.vpc_ipam_pool_public      | resource |
 
 ## Inputs
 | Name      | Description   | Type    |

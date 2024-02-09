@@ -18,14 +18,14 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.34.0"
+      version = "~> 5.0"
     }
   }
 }
 
 # Create Account IPAM Pool
 module "aws-acct-ipam" {
-  source                 = "./modules/aws-acct-ipam"
+  source                = "./modules/aws-acct-ipam"
   project_name           = var.project_name
   environment            = var.environment
   parent_pool_cidr_block = var.parent_pool_cidr_block
