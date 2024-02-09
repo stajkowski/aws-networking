@@ -7,12 +7,12 @@ mock_provider "aws" {
 }
 
 variables {
-  project_name            = "projecta"
-  environment             = "test"
-  vpc_name                = "infra1"
+  project_name                    = "projecta"
+  environment                     = "test"
+  vpc_name                        = "infra1"
   vpc_id                          = "vpcid"
-  public_subnet_ids               = ["sub1","sub2"]
-  private_subnet_ids              = ["sub3","sub4"]
+  public_subnet_ids               = ["sub1", "sub2"]
+  private_subnet_ids              = ["sub3", "sub4"]
   public_route_table_id           = "rt1"
   private_route_table_ids         = ["rt1", "rt2"]
   igw_is_enabled                  = true
@@ -28,8 +28,8 @@ run "positive_standard_config_igw_natgw" {
   command = plan
 
   variables {
-    private_route_table_ids         = ["rt1"]
-    private_subnet_ids              = ["sub1"]
+    private_route_table_ids = ["rt1"]
+    private_subnet_ids      = ["sub1"]
   }
 
   assert {
@@ -43,8 +43,8 @@ run "positive_standard_config_igw_natgw_ha" {
   command = plan
 
   variables {
-    private_route_table_ids         = ["rt1", "rt2"]
-    private_subnet_ids              = ["sub1", "sub2"]
+    private_route_table_ids = ["rt1", "rt2"]
+    private_subnet_ids      = ["sub1", "sub2"]
   }
 
   assert {
@@ -58,10 +58,10 @@ run "positive_standard_config_no_igw_natgw_private" {
   command = plan
 
   variables {
-    public_subnet_ids               = []
-    igw_is_enabled                  = false
-    nat_gw_is_enabled               = true
-    nat_gw_type                     = "private"
+    public_subnet_ids = []
+    igw_is_enabled    = false
+    nat_gw_is_enabled = true
+    nat_gw_type       = "private"
   }
 
   assert {
@@ -75,7 +75,7 @@ run "positive_standard_config_vpcgw" {
   command = plan
 
   variables {
-    vpc_gateway_services            = ["s3"]
+    vpc_gateway_services = ["s3"]
   }
 
   assert {
@@ -89,7 +89,7 @@ run "positive_standard_config_vpcgw_service_name" {
   command = plan
 
   variables {
-    vpc_gateway_services            = ["s3"]
+    vpc_gateway_services = ["s3"]
   }
 
   assert {
@@ -103,8 +103,8 @@ run "positive_standard_config_interface_endpoints_private" {
   command = plan
 
   variables {
-    vpc_interface_services_scope    = "private"
-    vpc_interface_services          = ["sts"]
+    vpc_interface_services_scope = "private"
+    vpc_interface_services       = ["sts"]
   }
 
   assert {
@@ -118,8 +118,8 @@ run "positive_standard_config_interface_endpoints_private_service_name" {
   command = plan
 
   variables {
-    vpc_interface_services_scope    = "private"
-    vpc_interface_services          = ["sts"]
+    vpc_interface_services_scope = "private"
+    vpc_interface_services       = ["sts"]
   }
 
   assert {
@@ -133,8 +133,8 @@ run "positive_standard_config_interface_endpoints_both" {
   command = plan
 
   variables {
-    vpc_interface_services_scope    = "both"
-    vpc_interface_services          = ["sts"]
+    vpc_interface_services_scope = "both"
+    vpc_interface_services       = ["sts"]
   }
 
   assert {
@@ -148,8 +148,8 @@ run "negative_igw_no_public_subnets" {
   command = plan
 
   variables {
-    public_subnet_ids               = []
-    nat_gw_is_enabled               = false
+    public_subnet_ids = []
+    nat_gw_is_enabled = false
   }
 
   expect_failures = [
@@ -162,8 +162,8 @@ run "negative_natgw_public_no_public_subnets" {
   command = plan
 
   variables {
-    public_subnet_ids               = []
-    igw_is_enabled                  = false
+    public_subnet_ids = []
+    igw_is_enabled    = false
   }
 
   expect_failures = [
@@ -176,8 +176,8 @@ run "negative_natgw_public_public_subnets_no_igw" {
   command = plan
 
   variables {
-    public_subnet_ids               = ["sub1","sub2"]
-    igw_is_enabled                  = false
+    public_subnet_ids = ["sub1", "sub2"]
+    igw_is_enabled    = false
   }
 
   expect_failures = [

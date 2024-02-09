@@ -1,4 +1,4 @@
-# aws-networking ![GitHub Release](https://img.shields.io/github/v/release/stajkowski/aws-networking)
+# terraform-aws-networking ![GitHub Release](https://img.shields.io/github/v/release/stajkowski/aws-networking)
 Terraform Module to simplify the creation of complex AWS VPC Networking configurations.  With a layer of abstraction, you can create multiple vpcs and connect them with Transit Gateway through configurations.  Control NACLs, Security Groups and Routing with simple shorthand reference to the VPC, and aws-networking module to ensure the correct values are substituted.  VPC CIDR assignments are derived from the account level IPAM pool and auto assigns VPC CIRDs and Subnet CIDRs.
 
 ## Examples
@@ -183,7 +183,8 @@ variables {
 }
 
 module "aws-networking" {
-  source      = "../../modules/aws-networking"
+  source  = "stajkowski/networking/aws"
+  version = "1.0.0"
   project_name = "projecta"
   environment = var.environment
   parent_pool_cidr_block = var.parent_cidr
