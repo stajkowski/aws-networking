@@ -25,7 +25,7 @@ terraform {
 
 # Create Account IPAM Pool
 module "aws-acct-ipam" {
-  source                = "./modules/aws-acct-ipam"
+  source                 = "./modules/aws-acct-ipam"
   project_name           = var.project_name
   environment            = var.environment
   parent_pool_cidr_block = var.parent_pool_cidr_block
