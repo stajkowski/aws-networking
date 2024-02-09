@@ -1,32 +1,32 @@
 mock_provider "aws" {}
 
 variables {
-  project_name            = "projecta"
-  environment             = "test"
-  vpc_name                = "infra1"
-  vpcs                    = {
+  project_name = "projecta"
+  environment  = "test"
+  vpc_name     = "infra1"
+  vpcs = {
     "egress" = {
-      vpc_id = "vpc-apwiefunawg"
-      private_subnet_ids = ["sub1","sub2"]
-      public_subnet_ids = ["sub3","sub4"]
+      vpc_id             = "vpc-apwiefunawg"
+      private_subnet_ids = ["sub1", "sub2"]
+      public_subnet_ids  = ["sub3", "sub4"]
     }
     "infra1" = {
-      vpc_id = "vpc-aaweoiuna9weg"
-      private_subnet_ids = ["sub5","sub6"]
-      public_subnet_ids = ["sub7","sub8"]
+      vpc_id             = "vpc-aaweoiuna9weg"
+      private_subnet_ids = ["sub5", "sub6"]
+      public_subnet_ids  = ["sub7", "sub8"]
     }
   }
   route_table_routes = [
     {
       route_table_id = "rt1"
-      destination = "0.0.0.0/0"
+      destination    = "0.0.0.0/0"
     },
     {
       route_table_id = "rt2"
-      destination = "0.0.0.0/0"
+      destination    = "0.0.0.0/0"
     }
   ]
-  tgw_vpc_attach = ["infra1","egress"]
+  tgw_vpc_attach = ["infra1", "egress"]
 }
 
 run "positive_standard_config" {
@@ -53,7 +53,7 @@ run "negative_invalid_tgw_attachment" {
   command = plan
 
   variables {
-    tgw_vpc_attach = ["inf","egress"]
+    tgw_vpc_attach = ["inf", "egress"]
   }
 
   expect_failures = [

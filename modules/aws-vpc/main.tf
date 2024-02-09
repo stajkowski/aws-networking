@@ -40,7 +40,7 @@ resource "aws_vpc_ipam_pool_cidr" "vpc_subnet_ipam_pool_cidr" {
   netmask_length = var.vpc_cidr_subnet_mask
   lifecycle {
     precondition {
-      condition = var.vpc_cidr_subnet_mask > split("/", var.acct_ipam_pool_cidr)[1]
+      condition     = var.vpc_cidr_subnet_mask > split("/", var.acct_ipam_pool_cidr)[1]
       error_message = "VPC CIDR subnet mask must be greater than the account IPAM pool CIDR subnet mask."
     }
   }

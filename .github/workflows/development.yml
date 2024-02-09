@@ -1,0 +1,47 @@
+name: Pull Request Workflow
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+
+jobs:
+  format:
+    name: Check formatting
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup Tarraform
+        run: ./bin/install_deb.sh
+      - name: Check Formatting
+        id: formattingCheck
+        continue-on-error: true
+        run: ./bin/check_formatting.sh
+      - name: Comment on Failure
+        if: failure() && steps.formattingCheck.outcome == 'failure'
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'Please run `terraform fmt -recursive` and commit the changes.'
+            })
+  test:
+    name: Test terraform-aws-networking
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup Tarraform
+        run: ./bin/install_deb.sh
+      - name: Run Tests
+        run: ./bin/run_tests.sh

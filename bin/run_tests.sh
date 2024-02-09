@@ -1,7 +1,13 @@
 #!/bin/bash
 
-# This script will run tests in each module.
-declare -a modules=("aws-nacl" "aws-vpc" "aws-vpc-gw", "aws-vpc-tgw")
+# This script will run tests in each module under ./modules
+i=0
+while read line
+do
+    modules[ $i ]="$line"        
+    (( i++ ))
+done < <(ls ./modules)
+# declare -a modules=("aws-nacl" "aws-vpc" "aws-vpc-gw", "aws-vpc-tgw")
 len_modules=${#modules[@]}
 CWD=$(pwd)
 

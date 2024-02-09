@@ -23,7 +23,7 @@ resource "aws_ec2_transit_gateway" "transit_gateway" {
   }
   lifecycle {
     precondition {
-      condition = length(var.route_table_routes) > 0
+      condition     = length(var.route_table_routes) > 0
       error_message = "No route_destinations specified in vpcs.[vpc_name].tgw_config.route_destinations. This will break connectivity."
     }
   }
@@ -42,7 +42,7 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "transit_gateway" {
   }
   lifecycle {
     precondition {
-      condition = can(var.vpcs[each.key].private_subnet_ids)
+      condition     = can(var.vpcs[each.key].private_subnet_ids)
       error_message = "Invalid VPC reference in transit_gw.tgw_vpc_attach for Transit Gateway Attachment."
     }
   }
