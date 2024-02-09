@@ -28,3 +28,14 @@ do
   printf "## Running tests for module: ${modules[$i]}\n\n"
   terraform test
 done
+
+printf "###########################################\n"
+printf "## Executing integration test \n"
+printf "###########################################\n\n"
+cd ${CWD}
+printf "## Initializing integration test\n\n"
+terraform init
+printf "## Validating terraform-aws-networking module\n\n"
+terraform validate
+printf "## Running integration tests\n\n"
+terraform test
