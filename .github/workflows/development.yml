@@ -20,7 +20,6 @@ jobs:
         run: ./bin/install_deb.sh
       - name: Check Formatting
         id: formattingCheck
-        continue-on-error: true
         run: ./bin/check_formatting.sh
   test:
     name: Test terraform-aws-networking
