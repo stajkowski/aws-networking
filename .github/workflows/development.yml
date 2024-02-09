@@ -23,7 +23,7 @@ jobs:
         continue-on-error: true
         run: ./bin/check_formatting.sh
       - name: Comment on Failure
-        if: failure() && steps.formattingCheck.outcome == 'failure'
+        if: steps.formattingCheck.outcome != 'success'
         uses: actions/github-script@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -34,6 +34,9 @@ jobs:
               repo: context.repo.repo,
               body: 'Please run `terraform fmt -recursive` and commit the changes.'
             })
+      - name: Fail Run
+        if: steps.formattingCheck.outcome != 'success'
+        run: exit 1
   test:
     name: Test terraform-aws-networking
     runs-on: ubuntu-latest
