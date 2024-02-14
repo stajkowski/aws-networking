@@ -25,7 +25,7 @@ jobs:
         run: |
           echo "::set-output name=run_mock::yes"
     outputs:
-      run_live: ${{ steps.set.outputs.run_mock }}
+      run_mock: ${{ steps.set.outputs.run_mock }}
   mock:
     name: Test mock terraform-aws-networking
     runs-on: ubuntu-latest
