@@ -48,6 +48,7 @@ jobs:
   integration:
     name: Test live integration terraform-aws-networking
     runs-on: ubuntu-latest
+    environment: PR_WORKFLOW
     timeout-minutes: 20
     needs:
       - mock
@@ -62,6 +63,7 @@ jobs:
   cleanup:
     name: Cleanup live integration terraform-aws-networking
     runs-on: ubuntu-latest
+    environment: PR_WORKFLOW
     timeout-minutes: 20
     needs:
       - integration
