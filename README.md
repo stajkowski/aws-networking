@@ -190,6 +190,12 @@ variables {
     transit_gw = {
       tgw_is_enabled = true
       tgw_vpc_attach = ["infra1", "egress"]
+      tgw_routes = [
+        {
+          "destination" = "0.0.0.0/0"
+          "vpc_attachment"  = "egress"
+        }
+      ]
     }
   }
 }
@@ -298,7 +304,9 @@ The following example will create:
 | vpcs.tgw_config.route_destinations | This will configure routes within the VPC Route Tables to the Transit Gateway. The configured value can be static, such as "0.0.0.0/0", or dynamic, similar to the NACL rules.  When using dynamic, utilize the VPC name you assigned to the VPC under "vpcs".  aws-networking module will replace the VPC name with the assigned CIDR. | `list(string)`
 | transit_gw.tgw_is_enabled | Boolean value to indicate that aws-networking should create a Transit Gateway. | `bool`
 | transit_gw.tgw_vpc_attach | List of named VPCs to attach to the Transit Gateway. | `list(string)`
-
+| transit_gw.tgw_routes | List of routes to add into the Transit Gateway. | `list(object())`
+| transit_gw.tgw_routes.*.destination | Destination route, such as `0.0.0.0/0` or a VPC name like `egress`. | `string`
+| transit_gw.tgw_routes.*.vpc_attachment | Name of the VPC that is attached to Transit Gateway in `transit_gw.tgw_vpc_attach`. This will point the destination toward the VPC named in this parameter. | `string`
 
 ## Major Revision Updates
 
@@ -461,6 +469,7 @@ The following example will create:
 				"ec2:ResetNetworkInterfaceAttribute",
 				"ec2:RevokeSecurityGroupEgress",
 				"ec2:RevokeSecurityGroupEgress",
+        "ec2:SearchTransitGatewayRoutes",
 				"ec2:UnassignIpv6Addresses",
 				"ec2:UnassignPrivateIpAddresses"
 			],

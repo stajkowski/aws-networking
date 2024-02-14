@@ -29,6 +29,19 @@ variable "tgw_vpc_attach" {
   type        = list(string)
 }
 
+variable "tgw_routes" {
+  description = "Added Transit Gateway Routes"
+  type        = list(
+    object(
+      {
+        destination  = string,
+        vpc_attachment  = string
+      }
+    )
+  )
+  default = []
+}
+
 variable "project_name" {
   description = "Project Name"
   type        = string

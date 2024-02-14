@@ -21,8 +21,8 @@ jobs:
       - name: Check Formatting
         id: formattingCheck
         run: ./bin/check_formatting.sh
-  test:
-    name: Test terraform-aws-networking
+  mock:
+    name: Test mock terraform-aws-networking
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -32,3 +32,22 @@ jobs:
         run: ./bin/install_deb.sh
       - name: Run Tests
         run: ./bin/run_tests.sh
+      - id: set
+        run: |
+          echo "::set-output name=run_live::yes"
+    outputs:
+      run_live: ${{ steps.set.outputs.run_live }}
+  integration:
+    name: Test live integration terraform-aws-networking
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs:
+      - test
+    if: needs.test.outputs.run_live == 'yes'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup Tarraform
+        run: ./bin/install_deb.sh
+      - name: Run Tests
+        run: ./bin/run_live_tests.sh
