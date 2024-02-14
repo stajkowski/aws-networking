@@ -41,8 +41,7 @@ locals {
   private_default_scope_id = length(data.aws_vpc_ipam_pools.region_ipam_pools.ipam_pools) == 0 ? aws_vpc_ipam.region_ipam[*].private_default_scope_id : data.aws_vpc_ipam_pools.region_ipam_pools.ipam_pools[*].ipam_scope_id
 }
 
-
-
+#TODO Check for pool overlap for the main parent pool if scope already exists and add tests
 resource "aws_vpc_ipam_pool" "region_ipam_pool" {
   description                       = "${var.project_name}-${var.environment}-vpc-ipam-pool"
   address_family                    = "ipv4"

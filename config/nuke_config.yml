@@ -1,0 +1,38 @@
+regions:
+- us-west-2
+
+account-blocklist:
+- 123456789012
+
+resource-types:
+  targets:
+  - EC2Address
+  - EC2ClientVpnEndpoint
+  - EC2ClientVpnEndpointAttachment
+  - EC2CustomerGateway
+  - EC2DHCPOption
+  - EC2DefaultSecurityGroupRule
+  - EC2EgressOnlyInternetGateway
+  - EC2InternetGateway
+  - EC2InternetGatewayAttachment
+  - EC2NATGateway
+  - EC2NetworkACL
+  - EC2NetworkInterface
+  - EC2RouteTable
+  - EC2SecurityGroup
+  - EC2Subnet
+  - EC2TGW
+  - EC2TGWAttachment
+  - EC2VPC
+  - EC2VPCEndpoint
+  - EC2VPCEndpointConnection
+  - EC2VPCEndpointServiceConfiguration
+  - EC2VPCPeeringConnection
+  - EC2VPNConnection
+  - EC2VPNGateway
+  - EC2VPNGatewayAttachment
+  excludes:
+  - IAM*
+
+accounts:
+  533267038789: {}

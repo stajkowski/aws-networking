@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs:
-      - test
+      - mock
     if: needs.test.outputs.run_live == 'yes'
     steps:
       - name: Checkout code
@@ -51,3 +51,16 @@ jobs:
         run: ./bin/install_deb.sh
       - name: Run Tests
         run: ./bin/run_live_tests.sh
+  cleanup:
+    name: Cleanup live integration terraform-aws-networking
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs:
+      - integration
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup Tarraform
+        run: ./bin/install_aws_nuke.sh
+      - name: Run Tests
+        run: ./bin/run_nuke.sh

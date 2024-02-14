@@ -420,6 +420,7 @@ The following example will create:
 				"ec2:DeleteVpc",
 				"ec2:DeleteVpcEndpoints",
 				"ec2:DeleteVpcEndpointServiceConfigurations",
+        "ec2:DeleteDhcpOptions",
 				"ec2:DescribeAccountAttributes",
 				"ec2:DescribeAddresses",
 				"ec2:DescribeAvailabilityZones",
