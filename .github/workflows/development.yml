@@ -21,10 +21,18 @@ jobs:
       - name: Check Formatting
         id: formattingCheck
         run: ./bin/check_formatting.sh
+      - id: set
+        run: |
+          echo "::set-output name=run_mock::yes"
+    outputs:
+      run_live: ${{ steps.set.outputs.run_mock }}
   mock:
     name: Test mock terraform-aws-networking
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    needs:
+      - format
+    if: needs.format.outputs.run_mock == 'yes'
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -43,7 +51,7 @@ jobs:
     timeout-minutes: 20
     needs:
       - mock
-    if: needs.test.outputs.run_live == 'yes'
+    if: needs.mock.outputs.run_live == 'yes'
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
