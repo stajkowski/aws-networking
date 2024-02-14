@@ -38,4 +38,4 @@ terraform init
 printf "## Validating terraform-aws-networking module\n\n"
 terraform validate
 printf "## Running integration tests\n\n"
-terraform test
+terraform test -filter=tests/integration.tftest.hcl

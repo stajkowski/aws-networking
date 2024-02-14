@@ -132,5 +132,11 @@ module "aws-vpc-tgw" {
       ]
     ]
   ])
+  tgw_routes = flatten([
+    for route in var.network_config.transit_gw.tgw_routes : {
+      destination    = can(module.aws-vpc[route.destination].vpc_cidr_block) ? module.aws-vpc[route.destination].vpc_cidr_block : route.destination
+      vpc_attachment = route.vpc_attachment
+    }
+  ])
   tgw_vpc_attach = var.network_config.transit_gw.tgw_vpc_attach
 }

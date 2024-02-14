@@ -27,6 +27,12 @@ variables {
     }
   ]
   tgw_vpc_attach = ["infra1", "egress"]
+  tgw_routes = [
+    {
+      "destination"    = "0.0.0.0/0"
+      "vpc_attachment" = "egress"
+    }
+  ]
 }
 
 run "positive_standard_config" {
@@ -46,6 +52,60 @@ run "positive_standard_config_route_table_routes" {
     condition     = length(aws_route.tgw_route) == 2
     error_message = "Expected 2 Route Table Updates"
   }
+
+}
+
+run "positive_tgw_routes" {
+  command = plan
+
+  assert {
+    condition     = length(aws_ec2_transit_gateway_route.tgw_route_table_routes) == 1
+    error_message = "Expected 1 Additional TGW Route"
+  }
+
+}
+
+run "positive_named_tgw_routes" {
+  command = plan
+
+  variables {
+    tgw_routes = [
+      {
+        "destination"    = "infra1"
+        "vpc_attachment" = "egress"
+      },
+      {
+        "destination"    = "0.0.0.0/0"
+        "vpc_attachment" = "egress"
+      }
+    ]
+  }
+
+  expect_failures = [
+    aws_ec2_transit_gateway_route.tgw_route_table_routes
+  ]
+
+}
+
+run "nagative_invalid_route_tgw_routes" {
+  command = plan
+
+  variables {
+    tgw_routes = [
+      {
+        "destination"    = "10.0.0.0/-1"
+        "vpc_attachment" = "egress"
+      },
+      {
+        "destination"    = "0.0.0.0/0"
+        "vpc_attachment" = "egress"
+      }
+    ]
+  }
+
+  expect_failures = [
+    aws_ec2_transit_gateway_route.tgw_route_table_routes
+  ]
 
 }
 

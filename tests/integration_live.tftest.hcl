@@ -1,14 +1,5 @@
-mock_provider "aws" {
-  mock_data "aws_availability_zones" {
-    defaults = {
-      names = ["1a", "1b", "1c", "1d"]
-    }
-  }
-  mock_data "aws_region" {
-    defaults = {
-      name = "us-east-1"
-    }
-  }
+provider "aws" {
+  region = "us-west-2"
 }
 
 variables {
@@ -196,8 +187,19 @@ variables {
   }
 }
 
-run "positive_integration_test_with_known_good_configuration" {
+run "positive_integration_test_with_known_good_configuration_plan" {
   command = plan
+
+  assert {
+    condition     = length(module.aws-vpc) == 2
+    error_message = "Expected 2 VPCs Created"
+  }
+
+}
+
+#TODO Add more validations
+run "positive_integration_test_with_known_good_configuration_apply" {
+  command = apply
 
   assert {
     condition     = length(module.aws-vpc) == 2

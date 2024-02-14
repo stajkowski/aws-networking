@@ -21,10 +21,18 @@ jobs:
       - name: Check Formatting
         id: formattingCheck
         run: ./bin/check_formatting.sh
-  test:
-    name: Test terraform-aws-networking
+      - id: set
+        run: |
+          echo "::set-output name=run_mock::yes"
+    outputs:
+      run_mock: ${{ steps.set.outputs.run_mock }}
+  mock:
+    name: Test mock terraform-aws-networking
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    needs:
+      - format
+    if: needs.format.outputs.run_mock == 'yes'
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -32,3 +40,49 @@ jobs:
         run: ./bin/install_deb.sh
       - name: Run Tests
         run: ./bin/run_tests.sh
+      - id: set
+        run: |
+          echo "::set-output name=run_live::yes"
+    outputs:
+      run_live: ${{ steps.set.outputs.run_live }}
+  integration:
+    name: Test live integration terraform-aws-networking
+    runs-on: ubuntu-latest
+    environment: PR_WORKFLOW
+    timeout-minutes: 20
+    needs:
+      - mock
+    if: needs.mock.outputs.run_live == 'yes'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup Tarraform
+        run: ./bin/install_deb.sh
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Run Tests
+        run: ./bin/run_live_tests.sh
+  cleanup:
+    name: Cleanup live integration terraform-aws-networking
+    runs-on: ubuntu-latest
+    environment: PR_WORKFLOW
+    timeout-minutes: 20
+    needs:
+      - integration
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup AWS Nuke
+        run: ./bin/install_aws_nuke.sh
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Run AWS Nuke
+        run: ./bin/run_nuke.sh
