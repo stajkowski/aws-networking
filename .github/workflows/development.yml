@@ -76,7 +76,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Setup Tarraform
+      - name: Setup AWS Nuke
         run: ./bin/install_aws_nuke.sh
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
