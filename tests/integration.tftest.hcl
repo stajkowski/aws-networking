@@ -188,8 +188,8 @@ variables {
       tgw_vpc_attach = ["infra1", "egress"]
       tgw_routes = [
         {
-          "destination" = "0.0.0.0/0"
-          "vpc_attachment"  = "egress"
+          "destination"    = "0.0.0.0/0"
+          "vpc_attachment" = "egress"
         }
       ]
     }

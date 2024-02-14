@@ -24,7 +24,7 @@ data "aws_vpc_ipam_pools" "region_ipam_pools" {
 
 #Create IPAM Scope for Account
 resource "aws_vpc_ipam" "region_ipam" {
-  count = length(data.aws_vpc_ipam_pools.region_ipam_pools.ipam_pools) == 0 ? 1 : 0
+  count       = length(data.aws_vpc_ipam_pools.region_ipam_pools.ipam_pools) == 0 ? 1 : 0
   description = "${var.project_name}-${var.environment}-account-ipan"
   operating_regions {
     region_name = data.aws_region.current.name
@@ -37,7 +37,7 @@ resource "aws_vpc_ipam" "region_ipam" {
 
 #If no IPAM pools exist, then use the created scope, otherwise use the first pool
 locals {
-  depends_on = [ data.aws_vpc_ipam_pools.region_ipam_pools, aws_vpc_ipam.region_ipam ]
+  depends_on               = [data.aws_vpc_ipam_pools.region_ipam_pools, aws_vpc_ipam.region_ipam]
   private_default_scope_id = length(data.aws_vpc_ipam_pools.region_ipam_pools.ipam_pools) == 0 ? aws_vpc_ipam.region_ipam[*].private_default_scope_id : data.aws_vpc_ipam_pools.region_ipam_pools.ipam_pools[*].ipam_scope_id
 }
 

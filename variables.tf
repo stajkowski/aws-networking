@@ -68,9 +68,9 @@ variable "network_config" {
       transit_gw = object({
         tgw_is_enabled = bool
         tgw_vpc_attach = list(string)
-        tgw_routes     = list(object({
-          destination       = string
-          vpc_attachment   = string
+        tgw_routes = list(object({
+          destination    = string
+          vpc_attachment = string
         }))
       })
   })

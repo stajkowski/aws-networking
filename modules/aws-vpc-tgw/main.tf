@@ -59,13 +59,13 @@ resource "aws_route" "tgw_route" {
 
 # Update Transit Gateway Routes
 resource "aws_ec2_transit_gateway_route" "tgw_route_table_routes" {
-  count                = length(var.tgw_routes)
-  destination_cidr_block = var.tgw_routes[count.index].destination
-  transit_gateway_attachment_id = aws_ec2_transit_gateway_vpc_attachment.transit_gateway[var.tgw_routes[count.index].vpc_attachment].id
+  count                          = length(var.tgw_routes)
+  destination_cidr_block         = var.tgw_routes[count.index].destination
+  transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.transit_gateway[var.tgw_routes[count.index].vpc_attachment].id
   transit_gateway_route_table_id = aws_ec2_transit_gateway.transit_gateway.association_default_route_table_id
   lifecycle {
     precondition {
-      condition = can(cidrsubnet(var.tgw_routes[count.index].destination, 0, 0))
+      condition     = can(cidrsubnet(var.tgw_routes[count.index].destination, 0, 0))
       error_message = "Invalid CIDR block in transit_gw.tgw_routes for Transit Gateway Route."
     }
   }

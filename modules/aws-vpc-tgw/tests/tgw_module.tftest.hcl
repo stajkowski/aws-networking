@@ -29,8 +29,8 @@ variables {
   tgw_vpc_attach = ["infra1", "egress"]
   tgw_routes = [
     {
-      "destination" = "0.0.0.0/0"
-      "vpc_attachment"  = "egress"
+      "destination"    = "0.0.0.0/0"
+      "vpc_attachment" = "egress"
     }
   ]
 }
@@ -71,12 +71,12 @@ run "positive_named_tgw_routes" {
   variables {
     tgw_routes = [
       {
-        "destination" = "infra1"
-        "vpc_attachment"  = "egress"
+        "destination"    = "infra1"
+        "vpc_attachment" = "egress"
       },
       {
-        "destination" = "0.0.0.0/0"
-        "vpc_attachment"  = "egress"
+        "destination"    = "0.0.0.0/0"
+        "vpc_attachment" = "egress"
       }
     ]
   }
@@ -93,12 +93,12 @@ run "nagative_invalid_route_tgw_routes" {
   variables {
     tgw_routes = [
       {
-        "destination" = "10.0.0.0/-1"
-        "vpc_attachment"  = "egress"
+        "destination"    = "10.0.0.0/-1"
+        "vpc_attachment" = "egress"
       },
       {
-        "destination" = "0.0.0.0/0"
-        "vpc_attachment"  = "egress"
+        "destination"    = "0.0.0.0/0"
+        "vpc_attachment" = "egress"
       }
     ]
   }

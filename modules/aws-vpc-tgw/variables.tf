@@ -31,11 +31,11 @@ variable "tgw_vpc_attach" {
 
 variable "tgw_routes" {
   description = "Added Transit Gateway Routes"
-  type        = list(
+  type = list(
     object(
       {
-        destination  = string,
-        vpc_attachment  = string
+        destination    = string,
+        vpc_attachment = string
       }
     )
   )
