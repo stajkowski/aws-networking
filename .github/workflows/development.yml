@@ -58,6 +58,11 @@ jobs:
         uses: actions/checkout@v2
       - name: Setup Tarraform
         run: ./bin/install_deb.sh
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       - name: Run Tests
         run: ./bin/run_live_tests.sh
   cleanup:
@@ -72,5 +77,10 @@ jobs:
         uses: actions/checkout@v2
       - name: Setup Tarraform
         run: ./bin/install_aws_nuke.sh
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       - name: Run Tests
         run: ./bin/run_nuke.sh
