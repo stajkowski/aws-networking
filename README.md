@@ -420,7 +420,7 @@ The following example will create:
 				"ec2:DeleteVpc",
 				"ec2:DeleteVpcEndpoints",
 				"ec2:DeleteVpcEndpointServiceConfigurations",
-        "ec2:DeleteDhcpOptions",
+                "ec2:DeleteDhcpOptions",
 				"ec2:DescribeAccountAttributes",
 				"ec2:DescribeAddresses",
 				"ec2:DescribeAvailabilityZones",
@@ -470,7 +470,7 @@ The following example will create:
 				"ec2:ResetNetworkInterfaceAttribute",
 				"ec2:RevokeSecurityGroupEgress",
 				"ec2:RevokeSecurityGroupEgress",
-        "ec2:SearchTransitGatewayRoutes",
+                "ec2:SearchTransitGatewayRoutes",
 				"ec2:UnassignIpv6Addresses",
 				"ec2:UnassignPrivateIpAddresses"
 			],
