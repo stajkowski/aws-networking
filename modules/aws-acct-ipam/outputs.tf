@@ -1,6 +1,6 @@
 output "acct_ipam_scope_id" {
   description = "Account IPAM Scope ID"
-  value       = local.private_default_scope_id[0]
+  value       = aws_vpc_ipam.region_ipam.private_default_scope_id
 }
 
 output "acct_ipam_pool_id" {
