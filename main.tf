@@ -50,7 +50,7 @@ module "aws-vpc" {
   additional_private_subnets = flatten([
     for subnet in each.value.additional_private_subnets : [
       for i in range(subnet.subnet_count) : [
-        "${each.key}${i + 1}::${i}"
+        "${each.key}::${i + 1}::${i}"
       ]
     ]
   ])

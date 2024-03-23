@@ -26,7 +26,11 @@ output "private_subnet_ids" {
 output "additional_private_subnet_ids" {
   description = "Additional Private Subnet IDs"
   value       = {
-    for subnet in var.additional_private_subnets : split("::", subnet)[0] => aws_subnet.additional_private_subnet[subnet].id
+    for subnet_group in flatten(distinct([for l in var.additional_private_subnets : split("::", l)[0]])) : subnet_group => flatten([
+      for subnet in var.additional_private_subnets : [
+        split("::", subnet_group)[0] == split("::", subnet)[0] ? aws_subnet.additional_private_subnet[subnet].id : null
+      ]
+    ])
   }
 }
 

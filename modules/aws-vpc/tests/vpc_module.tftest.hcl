@@ -63,11 +63,11 @@ run "positive_additional_private" {
   command = plan
 
   variables {
-    additional_private_subnets = ["db1::0", "db2::1"]
+    additional_private_subnets = ["db::1::0", "db::2::1"]
   }
 
   assert {
-    condition     = lookup(aws_subnet.additional_private_subnet, "db1::0", "default") != "default" && lookup(aws_subnet.additional_private_subnet, "db2::1", "default") != "default"
+    condition     = lookup(aws_subnet.additional_private_subnet, "db::1::0", "default") != "default" && lookup(aws_subnet.additional_private_subnet, "db::2::1", "default") != "default"
     error_message = "Expected 2 DB Subnets Created"
   }
 

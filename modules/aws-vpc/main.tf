@@ -89,7 +89,7 @@ resource "aws_vpc_ipam_pool_cidr_allocation" "vpc_ipam_pool_private" {
 resource "aws_vpc_ipam_pool_cidr_allocation" "vpc_ipam_pool_additional_private" {
   for_each       = toset(var.additional_private_subnets)
   ipam_pool_id   = aws_vpc_ipam_pool.vpc_subnet_ipam_pool.id
-  description    = "${var.project_name}-${var.environment}-vpc-${var.vpc_name}-private-subnet-${split("::", each.value)[0]}"
+  description    = "${var.project_name}-${var.environment}-vpc-${var.vpc_name}-private-subnet-${split("::", each.value)[0]}-${split("::", each.value)[1]}"
   netmask_length = var.subnet_mask
 
   depends_on = [
@@ -145,9 +145,9 @@ resource "aws_subnet" "additional_private_subnet" {
   for_each          = toset(var.additional_private_subnets)
   vpc_id            = aws_vpc.vpc_network.id
   cidr_block        = aws_vpc_ipam_pool_cidr_allocation.vpc_ipam_pool_additional_private[each.value].cidr
-  availability_zone = data.aws_availability_zones.available.names[split("::", each.value)[1]]
+  availability_zone = data.aws_availability_zones.available.names[split("::", each.value)[2]]
   tags = {
-    Name = "${var.project_name}-${var.environment}-vpc-${var.vpc_name}-private-subnet-${split("::", each.value)[0]}"
+    Name = "${var.project_name}-${var.environment}-vpc-${var.vpc_name}-private-subnet-${split("::", each.value)[0]}-${split("::", each.value)[1]}"
   }
   depends_on = [aws_vpc_ipam_pool_cidr_allocation.vpc_ipam_pool_additional_private]
 }
@@ -185,7 +185,7 @@ resource "aws_route_table_association" "private_subnet_association" {
 resource "aws_route_table_association" "additional_private_subnet_association" {
   for_each       = toset(var.additional_private_subnets)
   subnet_id      = aws_subnet.additional_private_subnet[each.value].id
-  route_table_id = var.route_table_per_private ? aws_route_table.private_route_table[split("::", each.value)[1]].id : aws_route_table.private_route_table[0].id
+  route_table_id = var.route_table_per_private ? aws_route_table.private_route_table[split("::", each.value)[2]].id : aws_route_table.private_route_table[0].id
 }
 
 # Create Default VPC Security Group
