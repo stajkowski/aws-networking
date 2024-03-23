@@ -15,7 +15,7 @@ Terraform Module to simplify the creation of complex AWS VPC Networking configur
 
 ## Usage Example
 ```
-variables {
+locals {
   project_name           = "projecta"
   environment            = "test"
   parent_pool_cidr_block = "10.0.0.0/8"
@@ -26,6 +26,7 @@ variables {
         private_subnets      = 2
         vpc_cidr_subnet_mask = 16
         subnet_mask          = 24
+        additional_private_subnets   = {}
         public_subnet_nacl_rules = [
           {
             rule_number = 10
@@ -104,6 +105,40 @@ variables {
         private_subnets      = 2
         vpc_cidr_subnet_mask = 16
         subnet_mask          = 24
+        additional_private_subnets   = {
+          "db" = {
+            subnet_count = 2
+            nacl_rules = [
+              {
+                rule_number = 10
+                egress      = false
+                action      = "allow"
+                protocol    = 6
+                cidr_block  = "infra1"
+                from_port   = 3306
+                to_port     = 3306
+              },
+              {
+                rule_number = 20
+                egress      = false
+                action      = "allow"
+                protocol    = 6
+                cidr_block  = "ipam_account_pool"
+                from_port   = 1024
+                to_port     = 65535
+              },
+              {
+                rule_number = 10
+                egress      = true
+                action      = "allow"
+                protocol    = -1
+                cidr_block  = "ipam_account_pool"
+                from_port   = 0
+                to_port     = 0
+              }
+            ]
+          }
+        }
         public_subnet_nacl_rules = [
           {
             rule_number = 10
@@ -200,13 +235,17 @@ variables {
   }
 }
 
+provider "aws" {
+  region = "us-west-2"
+}
+
 module "aws-networking" {
   source  = "stajkowski/networking/aws"
-  version = "1.0.0"
+  version = "2.0.0"
   project_name = local.project_name
   environment = local.environment
   parent_pool_cidr_block = local.parent_pool_cidr_block
-  network_config = local.env_network_config[var.environment]
+  network_config = local.network_config
 }
 ```
 The following example will create:
@@ -222,10 +261,11 @@ The following example will create:
 8. In the "egress" VPC, a VPCE Gateway is added for "s3" in the public/private route tables.
 8. In the "egress" VPC, private link support is added ("ec2 &"sts") to each private subnet since scope is "private".
 9. In the "infra1" VPC, private link support is added ("ec2 &"sts") to each private subnet since scope is "private".
-10. A single Transit Gateway with VPCs "egress" and "infra1" attached.
-11. Route destination "0.0.0.0/0" is added to the private route tables in "infra1" VPC.
-12. Route destination "infra1" (auto substituted for infra 1 CIDR) is added to public/private route tables in "egress" VPC.
-13. A default security group that can be used per VPC that allows parent IPAM pool CIDR of "10.0.0.0/8"
+10. Two additional private subnets for the "db" group in the "infra1" VPC with NACL rules associated and private route table association.
+11. A single Transit Gateway with VPCs "egress" and "infra1" attached.
+12. Route destination "0.0.0.0/0" is added to the private route tables in "infra1" VPC.
+13. Route destination "infra1" (auto substituted for infra 1 CIDR) is added to public/private route tables in "egress" VPC.
+14. A default security group that can be used per VPC that allows parent IPAM pool CIDR of "10.0.0.0/8"
 
 *NOTE*: Size of each VPC CIDR and subnet mask can be controlled through the configuration "vpc_cidr_subnet_mask" and "subnet_mask"
 
@@ -292,6 +332,9 @@ The following example will create:
 | vpcs.private_subnets | Number of private subnets to create in the VPC.  This is required to be > 0 if a priate NAT Gateway is configured for the VPC. | `number`
 | vpcs.vpc_cidr_subnet_mask | Length of mask for auto assignment of the VPC CIDR. | `number`
 | vpcs.subnet_mask | Length of mask for auto assignment of VPC Subnets. | `number`
+| vpcs.additional_private_subnets | Map of additional private subnets to create and associate with private route table with NACL rules. | `map(object{})`
+| vpcs.additional_private_subnets.`id`.subnet_count | The number of subnets to create for this additional private subnet group. | `number`
+| vpcs.additional_private_subnets.`id`.nacl_rules | This will iterate over the configured NACL rules and assign them to the private subnet group subnet ids. This is direct configuration of NACL Rules in AWS with support for dynamic names of VPCs in the cidr_block within aws-networking module.  It is possible to supply a standard CIDR  for `cidr_block` such as "10.0.0.0/8" or "0.0.0.0/0", but alternatively you can pass the key value under "vpcs", which is the name of your VPC.  aws-networking module will then replace the VPC name with the assigned CIDR. Additionally, `ipam_account_pool` can be set for the `cidr_block` to replace this value with the configured account level pool or parent pool. | `list(object())`
 | vpcs.gw_services.igw_is_enabled | Boolean value to indicate if an Internet Gateway is to be configured for the VPC. | `bool`
 | vpcs.gw_services.nat_gw_is_enabled | Boolean value to indicate if a NAT Gateway is to be configured for the VPC. | `bool`
 | vpcs.gw_services.nat_gw_type | (`public`, `private`) NAT Gateway type is direct confgiuration of the aws module and can be public or private.  Public NAT Gateway requires creation of an Internet Gateway to allow traffic to exit to the Internet. Private NAT Gateways: https://docs.aws.amazon.com/whitepapers/latest/building-scalable-secure-multi-vpc-network-infrastructure/private-nat-gateway.html. Public NAT Gateway Architecture: https://docs.aws.amazon.com/network-firewall/latest/developerguide/arch-igw-ngw.html | `string`
@@ -299,8 +342,8 @@ The following example will create:
 | vpcs.gw_services.vpc_gateway_services | This is a list of VPCE Gateway services to create and associate with public/private subnets.  Please refer to AWS Documentation on which services support VPCE Gateway but as of this release, only "s3" and "dynamodb" are supported. | `list(string)`
 | vpcs.gw_services.vpc_interface_services | This is a list of services to create Interface Endpoints (PrivateLink).  The difference between VPCE Gateway and Interface Endpoint (PrivateLink), is that Interface Endpoint allows access to AWS services through an IP Address assigned from within your subnets, whereas, VPCE Gateway endpoints inject routes into your associated routing tables. Please refer to AWS documentation for supported services (https://docs.aws.amazon.com/vpc/latest/privatelink/aws-services-privatelink-support.html) and please use the service name in the endpoint, i.e. for "com.amazonaws.us-east-1.s3" you would set this configuration to ["s3"] | `list(string)`
 | vpcs.gw_services.vpc_interface_services_scope | (`private`, `both`) This will control in aws-networking module which subnets to attach to the Interface Endpoint.  `private` will attach only private subnets, whereas `both` will assign both public and private subnets to the Interface Endpoint.
-| vpcs.public_subnet_nacl_rules | This will iterate over the configured NACL rules and assign them to the public route table. This is direct configuration of NACL Rules in AWS with support for dynamic names of VPCs in the cidr_block within aws-networking module.  It is possible to supply a standard CIDR for `cidr_block` such as "10.0.0.0/8" or "0.0.0.0/0", but alternatively you can pass the key value under "vpcs", which is the name of your VPC.  aws-networking module will then replace the VPC name with the assigned CIDR.  Additionally, `ipam_account_pool` can be set for the `cidr_block` to replace this value with the configured account level pool or parent pool. | `list(object())`
-| vpcs.public_subnet_nacl_rules | This will iterate over the configured NACL rules and assign them to the private route table. This is direct configuration of NACL Rules in AWS with support for dynamic names of VPCs in the cidr_block within aws-networking module.  It is possible to supply a standard CIDR  for `cidr_block` such as "10.0.0.0/8" or "0.0.0.0/0", but alternatively you can pass the key value under "vpcs", which is the name of your VPC.  aws-networking module will then replace the VPC name with the assigned CIDR. Additionally, `ipam_account_pool` can be set for the `cidr_block` to replace this value with the configured account level pool or parent pool. | `list(object())`
+| vpcs.public_subnet_nacl_rules | This will iterate over the configured NACL rules and assign them to the public subnet ids. This is direct configuration of NACL Rules in AWS with support for dynamic names of VPCs in the cidr_block within aws-networking module.  It is possible to supply a standard CIDR for `cidr_block` such as "10.0.0.0/8" or "0.0.0.0/0", but alternatively you can pass the key value under "vpcs", which is the name of your VPC.  aws-networking module will then replace the VPC name with the assigned CIDR.  Additionally, `ipam_account_pool` can be set for the `cidr_block` to replace this value with the configured account level pool or parent pool. | `list(object())`
+| vpcs.private_subnet_nacl_rules | This will iterate over the configured NACL rules and assign them to the private subnet ids. This is direct configuration of NACL Rules in AWS with support for dynamic names of VPCs in the cidr_block within aws-networking module.  It is possible to supply a standard CIDR  for `cidr_block` such as "10.0.0.0/8" or "0.0.0.0/0", but alternatively you can pass the key value under "vpcs", which is the name of your VPC.  aws-networking module will then replace the VPC name with the assigned CIDR. Additionally, `ipam_account_pool` can be set for the `cidr_block` to replace this value with the configured account level pool or parent pool. | `list(object())`
 | vpcs.tgw_config.route_destinations | This will configure routes within the VPC Route Tables to the Transit Gateway. The configured value can be static, such as "0.0.0.0/0", or dynamic, similar to the NACL rules.  When using dynamic, utilize the VPC name you assigned to the VPC under "vpcs".  aws-networking module will replace the VPC name with the assigned CIDR. | `list(string)`
 | transit_gw.tgw_is_enabled | Boolean value to indicate that aws-networking should create a Transit Gateway. | `bool`
 | transit_gw.tgw_vpc_attach | List of named VPCs to attach to the Transit Gateway. | `list(string)`
@@ -326,6 +369,10 @@ The following example will create:
 12. Private Interface Gateway will associate interface gateway with private subnets only.
 13. Transit Gateway with VPC assignment.
 14. Transit Gateway route updates for every route table in the assigned VPC.
+
+#### Version 2.0
+
+1. Support for additional named private subnets.
 
 ## Required Permissions
 ```
@@ -420,7 +467,7 @@ The following example will create:
 				"ec2:DeleteVpc",
 				"ec2:DeleteVpcEndpoints",
 				"ec2:DeleteVpcEndpointServiceConfigurations",
-                "ec2:DeleteDhcpOptions",
+				"ec2:DeleteDhcpOptions",
 				"ec2:DescribeAccountAttributes",
 				"ec2:DescribeAddresses",
 				"ec2:DescribeAvailabilityZones",
@@ -470,7 +517,7 @@ The following example will create:
 				"ec2:ResetNetworkInterfaceAttribute",
 				"ec2:RevokeSecurityGroupEgress",
 				"ec2:RevokeSecurityGroupEgress",
-                "ec2:SearchTransitGatewayRoutes",
+				"ec2:SearchTransitGatewayRoutes",
 				"ec2:UnassignIpv6Addresses",
 				"ec2:UnassignPrivateIpAddresses"
 			],

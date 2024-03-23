@@ -47,19 +47,39 @@ module "aws-vpc" {
   route_table_per_private = each.value.gw_services.nat_gw_ha
   vpc_cidr_subnet_mask    = each.value.vpc_cidr_subnet_mask
   subnet_mask             = each.value.subnet_mask
+  # Additional private subnets will encode a format that informs the:
+  # 1. Subnet Group
+  # 2. Subnet Index
+  # 3. Subnet Count for Group
+  additional_private_subnets = flatten([
+    for k, v in each.value.additional_private_subnets : [
+      for i in range(v.subnet_count) : [
+        "${k}::${i + 1}::${i}"
+      ]
+    ]
+  ])
 }
 
 # Create NACLs for VPCs
 module "aws-nacl" {
-  source             = "./modules/aws-nacl"
-  depends_on         = [module.aws-vpc]
-  for_each           = var.network_config.vpcs
-  project_name       = var.project_name
-  environment        = var.environment
-  vpc_name           = each.key
-  vpc_id             = module.aws-vpc[each.key].vpc_id
-  public_subnet_ids  = module.aws-vpc[each.key].public_subnet_ids
-  private_subnet_ids = module.aws-vpc[each.key].private_subnet_ids
+  source                        = "./modules/aws-nacl"
+  depends_on                    = [module.aws-vpc]
+  for_each                      = var.network_config.vpcs
+  project_name                  = var.project_name
+  environment                   = var.environment
+  vpc_name                      = each.key
+  vpc_id                        = module.aws-vpc[each.key].vpc_id
+  public_subnet_ids             = module.aws-vpc[each.key].public_subnet_ids
+  private_subnet_ids            = module.aws-vpc[each.key].private_subnet_ids
+  additional_private_subnet_ids = module.aws-vpc[each.key].additional_private_subnet_ids
+  additional_private_subnet_associations = flatten([
+    for k, v in module.aws-vpc[each.key].additional_private_subnet_ids : [
+      for sn in v : {
+        subnet_id    = sn
+        subnet_group = k
+      }
+    ]
+  ])
   public_subnet_nacl_rules = [for rule in each.value.public_subnet_nacl_rules : {
     rule_number = rule.rule_number
     egress      = rule.egress
@@ -80,19 +100,38 @@ module "aws-nacl" {
       to_port     = rule.to_port
     }
   ]
+  additional_private_subnet_nacl_rules = flatten([
+    for k, v in each.value.additional_private_subnets : [
+      for rule in v.nacl_rules : {
+        rule_number = rule.rule_number
+        egress      = rule.egress
+        protocol    = rule.protocol
+        action      = rule.action
+        cidr_block  = can(lookup(var.network_config.vpcs, rule.cidr_block)) ? module.aws-vpc[rule.cidr_block].vpc_cidr_block : replace(rule.cidr_block, "ipam_account_pool", var.parent_pool_cidr_block)
+        from_port   = rule.from_port
+        to_port     = rule.to_port
+        subnet      = k
+      }
+    ]
+  ])
 }
 
 # Setup IGW and NAT Gateway
 module "aws-vpc-gw" {
-  source                          = "./modules/aws-vpc-gw"
-  depends_on                      = [module.aws-vpc]
-  for_each                        = var.network_config.vpcs
-  project_name                    = var.project_name
-  environment                     = var.environment
-  vpc_name                        = each.key
-  vpc_id                          = module.aws-vpc[each.key].vpc_id
-  public_subnet_ids               = module.aws-vpc[each.key].public_subnet_ids
-  private_subnet_ids              = module.aws-vpc[each.key].private_subnet_ids
+  source             = "./modules/aws-vpc-gw"
+  depends_on         = [module.aws-vpc]
+  for_each           = var.network_config.vpcs
+  project_name       = var.project_name
+  environment        = var.environment
+  vpc_name           = each.key
+  vpc_id             = module.aws-vpc[each.key].vpc_id
+  public_subnet_ids  = module.aws-vpc[each.key].public_subnet_ids
+  private_subnet_ids = module.aws-vpc[each.key].private_subnet_ids
+  additional_private_subnet_ids = flatten([
+    for k, v in module.aws-vpc[each.key].additional_private_subnet_ids : [
+      for sn in v : sn
+    ]
+  ])
   public_route_table_id           = module.aws-vpc[each.key].public_route_table_id
   private_route_table_ids         = module.aws-vpc[each.key].private_route_table_ids
   igw_is_enabled                  = each.value.gw_services.igw_is_enabled
@@ -114,8 +153,13 @@ module "aws-vpc-tgw" {
   vpcs = {
     for vpc in var.network_config.transit_gw.tgw_vpc_attach : vpc => {
       vpc_id             = module.aws-vpc[vpc].vpc_id
-      private_subnet_ids = module.aws-vpc[vpc].private_subnet_ids
       public_subnet_ids  = module.aws-vpc[vpc].public_subnet_ids
+      private_subnet_ids = module.aws-vpc[vpc].private_subnet_ids
+      additional_private_subnet_ids = flatten([
+        for k, v in module.aws-vpc[vpc].additional_private_subnet_ids : [
+          for sn in v : sn
+        ]
+      ])
     }
   }
   # Setup route table routes for a many to many relationship due to HA

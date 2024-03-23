@@ -34,6 +34,18 @@ variable "network_config" {
         private_subnets      = number
         vpc_cidr_subnet_mask = number
         subnet_mask          = number
+        additional_private_subnets = map(object({
+          subnet_count = number
+          nacl_rules = list(object({
+            rule_number = number
+            egress      = bool
+            action      = string
+            protocol    = string
+            from_port   = number
+            to_port     = number
+            cidr_block  = string
+          }))
+        }))
         gw_services = object({
           igw_is_enabled               = bool
           nat_gw_is_enabled            = bool

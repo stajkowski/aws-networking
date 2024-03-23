@@ -1,18 +1,14 @@
-provider "aws" {
-  region = "us-west-2"
-}
-
-variables {
+locals {
   project_name           = "projecta"
   environment            = "test"
-  parent_pool_cidr_block = "10.250.0.0/16"
+  parent_pool_cidr_block = "10.0.0.0/8"
   network_config = {
     vpcs = {
       "egress" = {
         public_subnets             = 2
         private_subnets            = 2
-        vpc_cidr_subnet_mask       = 22
-        subnet_mask                = 27
+        vpc_cidr_subnet_mask       = 16
+        subnet_mask                = 24
         additional_private_subnets = {}
         public_subnet_nacl_rules = [
           {
@@ -90,8 +86,8 @@ variables {
       "infra1" = {
         public_subnets       = 0
         private_subnets      = 2
-        vpc_cidr_subnet_mask = 24
-        subnet_mask          = 27
+        vpc_cidr_subnet_mask = 16
+        subnet_mask          = 24
         additional_private_subnets = {
           "db" = {
             subnet_count = 2
@@ -222,23 +218,14 @@ variables {
   }
 }
 
-run "positive_integration_test_with_known_good_configuration_plan" {
-  command = plan
-
-  assert {
-    condition     = length(module.aws-vpc) == 2
-    error_message = "Expected 2 VPCs Created"
-  }
-
+provider "aws" {
+  region = "us-west-2"
 }
 
-#TODO Add more validations
-run "positive_integration_test_with_known_good_configuration_apply" {
-  command = apply
-
-  assert {
-    condition     = length(module.aws-vpc) == 2
-    error_message = "Expected 2 VPCs Created"
-  }
-
+module "aws-networking" {
+  source                 = "../"
+  project_name           = local.project_name
+  environment            = local.environment
+  parent_pool_cidr_block = local.parent_pool_cidr_block
+  network_config         = local.network_config
 }

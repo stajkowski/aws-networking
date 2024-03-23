@@ -33,6 +33,14 @@ resource "aws_network_acl" "private_subnet_nacl" {
   }
 }
 
+resource "aws_network_acl" "additional_private_subnet_nacl" {
+  for_each = var.additional_private_subnet_ids
+  vpc_id   = var.vpc_id
+  tags = {
+    Name = "${var.project_name}-${var.environment}-${var.vpc_name}-private-subnet-${each.key}-nacl"
+  }
+}
+
 resource "aws_network_acl_rule" "public_subnet_nacl_rules" {
   count          = length(var.public_subnet_ids) > 0 ? length(var.public_subnet_nacl_rules) : 0
   network_acl_id = length(aws_network_acl.public_subnet_nacl) > 0 ? aws_network_acl.public_subnet_nacl[0].id : ""
@@ -71,6 +79,25 @@ resource "aws_network_acl_rule" "private_subnet_nacl_rules" {
   }
 }
 
+resource "aws_network_acl_rule" "additional_private_subnet_nacl_rules" {
+  count          = length(var.additional_private_subnet_nacl_rules) > 0 ? length(var.additional_private_subnet_nacl_rules) : 0
+  network_acl_id = aws_network_acl.additional_private_subnet_nacl[var.additional_private_subnet_nacl_rules[count.index].subnet].id
+  rule_number    = var.additional_private_subnet_nacl_rules[count.index].rule_number
+  egress         = var.additional_private_subnet_nacl_rules[count.index].egress
+  protocol       = var.additional_private_subnet_nacl_rules[count.index].protocol
+  rule_action    = var.additional_private_subnet_nacl_rules[count.index].action
+  cidr_block     = var.additional_private_subnet_nacl_rules[count.index].cidr_block
+  from_port      = var.additional_private_subnet_nacl_rules[count.index].from_port
+  to_port        = var.additional_private_subnet_nacl_rules[count.index].to_port
+  depends_on     = [aws_network_acl.additional_private_subnet_nacl]
+  lifecycle {
+    precondition {
+      condition     = can(cidrsubnet(var.additional_private_subnet_nacl_rules[count.index].cidr_block, 0, 0))
+      error_message = "Invalid NACL rule CIDR block. Ensure shorthand names are referenced correctly in rules to valid VPC names or ipam_account_pool."
+    }
+  }
+}
+
 # Associate NACL with public and private subnets
 resource "aws_network_acl_association" "public_subnet_nacl_association" {
   count          = length(var.public_subnet_ids)
@@ -84,4 +111,11 @@ resource "aws_network_acl_association" "private_subnet_nacl_association" {
   subnet_id      = var.private_subnet_ids[count.index]
   network_acl_id = length(aws_network_acl.private_subnet_nacl) > 0 ? aws_network_acl.private_subnet_nacl[0].id : ""
   depends_on     = [aws_network_acl.private_subnet_nacl]
+}
+
+resource "aws_network_acl_association" "additional_private_subnet_nacl_association" {
+  count          = length(var.additional_private_subnet_associations)
+  subnet_id      = var.additional_private_subnet_associations[count.index].subnet_id
+  network_acl_id = aws_network_acl.additional_private_subnet_nacl[var.additional_private_subnet_associations[count.index].subnet_group].id
+  depends_on     = [aws_network_acl.additional_private_subnet_nacl]
 }

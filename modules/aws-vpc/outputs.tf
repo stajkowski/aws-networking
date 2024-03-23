@@ -23,6 +23,17 @@ output "private_subnet_ids" {
   value       = aws_subnet.private_subnet[*].id
 }
 
+output "additional_private_subnet_ids" {
+  description = "Additional Private Subnet IDs"
+  value = {
+    for subnet_group in flatten(distinct([for l in var.additional_private_subnets : split("::", l)[0]])) : subnet_group => flatten([
+      for subnet in var.additional_private_subnets : [
+        split("::", subnet_group)[0] == split("::", subnet)[0] ? aws_subnet.additional_private_subnet[subnet].id : null
+      ]
+    ])
+  }
+}
+
 output "public_availability_zones" {
   description = "Public Availability Zones"
   value       = aws_subnet.public_subnet[*].availability_zone
