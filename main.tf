@@ -47,6 +47,13 @@ module "aws-vpc" {
   route_table_per_private = each.value.gw_services.nat_gw_ha
   vpc_cidr_subnet_mask    = each.value.vpc_cidr_subnet_mask
   subnet_mask             = each.value.subnet_mask
+  additional_private_subnets = flatten([
+    for subnet in each.value.additional_private_subnets : [
+      for i in range(subnet.subnet_count) : [
+        "${each.key}${i + 1}::${i}"
+      ]
+    ]
+  ])
 }
 
 # Create NACLs for VPCs

@@ -54,6 +54,11 @@ variable "private_subnets" {
   }
 }
 
+variable "additional_private_subnets" {
+  description = "Additional Private Subnets"
+  type        = list(string)
+}
+
 variable "route_table_per_private" {
   description = "Route Table per Private Subnet"
   type        = bool

@@ -23,6 +23,13 @@ output "private_subnet_ids" {
   value       = aws_subnet.private_subnet[*].id
 }
 
+output "additional_private_subnet_ids" {
+  description = "Additional Private Subnet IDs"
+  value       = {
+    for subnet in var.additional_private_subnets : split("::", subnet)[0] => aws_subnet.additional_private_subnet[subnet].id
+  }
+}
+
 output "public_availability_zones" {
   description = "Public Availability Zones"
   value       = aws_subnet.public_subnet[*].availability_zone

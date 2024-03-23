@@ -18,6 +18,7 @@ variables {
   route_table_per_private = false
   vpc_cidr_subnet_mask    = 16
   subnet_mask             = 24
+  additional_private_subnets = []
 }
 
 run "positive_standard_config" {
@@ -54,6 +55,20 @@ run "positive_no_public_subnets" {
   assert {
     condition     = length(aws_subnet.public_subnet) == 0 && length(aws_subnet.private_subnet) == 2
     error_message = "Expected 0 Public and 2 Private Subnets Created"
+  }
+
+}
+
+run "positive_additional_private" {
+  command = plan
+
+  variables {
+    additional_private_subnets = ["db1::0", "db2::1"]
+  }
+
+  assert {
+    condition     = lookup(aws_subnet.additional_private_subnet, "db1::0", "default") != "default" && lookup(aws_subnet.additional_private_subnet, "db2::1", "default") != "default"
+    error_message = "Expected 2 DB Subnets Created"
   }
 
 }

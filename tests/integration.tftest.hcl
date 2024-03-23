@@ -22,6 +22,7 @@ variables {
         private_subnets      = 2
         vpc_cidr_subnet_mask = 24
         subnet_mask          = 27
+        additional_private_subnets   = {}
         public_subnet_nacl_rules = [
           {
             rule_number = 10
@@ -100,6 +101,40 @@ variables {
         private_subnets      = 2
         vpc_cidr_subnet_mask = 24
         subnet_mask          = 27
+        additional_private_subnets   = {
+          "db" = {
+            subnet_count = 2
+            nacl_rules = [
+              {
+                rule_number = 10
+                egress      = false
+                action      = "allow"
+                protocol    = 6
+                cidr_block  = "infra1"
+                from_port   = 3306
+                to_port     = 3306
+              },
+              {
+                rule_number = 20
+                egress      = false
+                action      = "allow"
+                protocol    = 6
+                cidr_block  = "ipam_account_pool"
+                from_port   = 1024
+                to_port     = 65535
+              },
+              {
+                rule_number = 10
+                egress      = true
+                action      = "allow"
+                protocol    = -1
+                cidr_block  = "ipam_account_pool"
+                from_port   = 0
+                to_port     = 0
+              }
+            ]
+          }
+        }
         public_subnet_nacl_rules = [
           {
             rule_number = 10
