@@ -47,6 +47,10 @@ module "aws-vpc" {
   route_table_per_private = each.value.gw_services.nat_gw_ha
   vpc_cidr_subnet_mask    = each.value.vpc_cidr_subnet_mask
   subnet_mask             = each.value.subnet_mask
+  # Additional private subnets will encode a format that informs the:
+  # 1. Subnet Group
+  # 2. Subnet Index
+  # 3. Subnet Count for Group
   additional_private_subnets = flatten([
     for k, v in each.value.additional_private_subnets : [
       for i in range(v.subnet_count) : [
