@@ -3,9 +3,9 @@ variable "vpcs" {
   type = map(
     object(
       {
-        vpc_id             = string,
-        private_subnet_ids = list(string),
-        public_subnet_ids  = list(string),
+        vpc_id                        = string,
+        private_subnet_ids            = list(string),
+        public_subnet_ids             = list(string),
         additional_private_subnet_ids = list(string)
       }
     )

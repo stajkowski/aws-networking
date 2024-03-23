@@ -5,11 +5,11 @@ locals {
   network_config = {
     vpcs = {
       "egress" = {
-        public_subnets       = 2
-        private_subnets      = 2
-        vpc_cidr_subnet_mask = 16
-        subnet_mask          = 24
-        additional_private_subnets   = {}
+        public_subnets             = 2
+        private_subnets            = 2
+        vpc_cidr_subnet_mask       = 16
+        subnet_mask                = 24
+        additional_private_subnets = {}
         public_subnet_nacl_rules = [
           {
             rule_number = 10
@@ -88,7 +88,7 @@ locals {
         private_subnets      = 2
         vpc_cidr_subnet_mask = 16
         subnet_mask          = 24
-        additional_private_subnets   = {
+        additional_private_subnets = {
           "db" = {
             subnet_count = 2
             nacl_rules = [
@@ -210,8 +210,8 @@ locals {
       tgw_vpc_attach = ["infra1", "egress"]
       tgw_routes = [
         {
-          "destination" = "0.0.0.0/0"
-          "vpc_attachment"  = "egress"
+          "destination"    = "0.0.0.0/0"
+          "vpc_attachment" = "egress"
         }
       ]
     }
@@ -223,9 +223,9 @@ provider "aws" {
 }
 
 module "aws-networking" {
-  source  = "../"
-  project_name = local.project_name
-  environment = local.environment
+  source                 = "../"
+  project_name           = local.project_name
+  environment            = local.environment
   parent_pool_cidr_block = local.parent_pool_cidr_block
-  network_config = local.network_config
+  network_config         = local.network_config
 }
