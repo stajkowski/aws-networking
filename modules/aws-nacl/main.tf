@@ -35,7 +35,7 @@ resource "aws_network_acl" "private_subnet_nacl" {
 
 resource "aws_network_acl" "additional_private_subnet_nacl" {
   for_each = var.additional_private_subnet_ids
-  vpc_id = var.vpc_id
+  vpc_id   = var.vpc_id
   tags = {
     Name = "${var.project_name}-${var.environment}-${var.vpc_name}-private-subnet-${each.key}-nacl"
   }

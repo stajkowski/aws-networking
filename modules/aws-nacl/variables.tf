@@ -25,7 +25,7 @@ variable "private_subnet_ids" {
 variable "additional_private_subnet_ids" {
   description = "Additional Private Subnet IDs"
   type        = map(list(string))
-  default = {}
+  default     = {}
 }
 
 variable "public_subnet_nacl_rules" {
@@ -74,7 +74,7 @@ variable "additional_private_subnet_nacl_rules" {
 variable "additional_private_subnet_associations" {
   description = "Additional Private Subnet Associations"
   type = list(object({
-    subnet_id = string
+    subnet_id    = string
     subnet_group = string
   }))
   default = []

@@ -18,11 +18,11 @@ variables {
   network_config = {
     vpcs = {
       "egress" = {
-        public_subnets       = 2
-        private_subnets      = 2
-        vpc_cidr_subnet_mask = 24
-        subnet_mask          = 27
-        additional_private_subnets   = {}
+        public_subnets             = 2
+        private_subnets            = 2
+        vpc_cidr_subnet_mask       = 24
+        subnet_mask                = 27
+        additional_private_subnets = {}
         public_subnet_nacl_rules = [
           {
             rule_number = 10
@@ -101,7 +101,7 @@ variables {
         private_subnets      = 2
         vpc_cidr_subnet_mask = 24
         subnet_mask          = 27
-        additional_private_subnets   = {
+        additional_private_subnets = {
           "db" = {
             subnet_count = 2
             nacl_rules = [

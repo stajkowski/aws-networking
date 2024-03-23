@@ -1,12 +1,12 @@
 mock_provider "aws" {}
 
 variables {
-  project_name       = "projecta"
-  environment        = "test"
-  vpc_name           = "infra1"
-  vpc_id             = "vpc-afwpeoijwegt"
-  public_subnet_ids  = ["sub1", "sub2"]
-  private_subnet_ids = ["sub3", "sub4"]
+  project_name                  = "projecta"
+  environment                   = "test"
+  vpc_name                      = "infra1"
+  vpc_id                        = "vpc-afwpeoijwegt"
+  public_subnet_ids             = ["sub1", "sub2"]
+  private_subnet_ids            = ["sub3", "sub4"]
   additional_private_subnet_ids = {}
   public_subnet_nacl_rules = [
     {
@@ -156,11 +156,11 @@ run "positive_additional_private_nacl_rules" {
     ]
     additional_private_subnet_associations = [
       {
-        subnet_id = "sub5"
+        subnet_id    = "sub5"
         subnet_group = "db"
       },
       {
-        subnet_id = "sub6"
+        subnet_id    = "sub6"
         subnet_group = "db"
       }
     ]
@@ -269,11 +269,11 @@ run "negative_invalid_additional_private_rule_cidr" {
     ]
     additional_private_subnet_associations = [
       {
-        subnet_id = "sub5"
+        subnet_id    = "sub5"
         subnet_group = "db"
       },
       {
-        subnet_id = "sub6"
+        subnet_id    = "sub6"
         subnet_group = "db"
       }
     ]

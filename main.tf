@@ -62,22 +62,22 @@ module "aws-vpc" {
 
 # Create NACLs for VPCs
 module "aws-nacl" {
-  source             = "./modules/aws-nacl"
-  depends_on         = [module.aws-vpc]
-  for_each           = var.network_config.vpcs
-  project_name       = var.project_name
-  environment        = var.environment
-  vpc_name           = each.key
-  vpc_id             = module.aws-vpc[each.key].vpc_id
-  public_subnet_ids  = module.aws-vpc[each.key].public_subnet_ids
-  private_subnet_ids = module.aws-vpc[each.key].private_subnet_ids
+  source                        = "./modules/aws-nacl"
+  depends_on                    = [module.aws-vpc]
+  for_each                      = var.network_config.vpcs
+  project_name                  = var.project_name
+  environment                   = var.environment
+  vpc_name                      = each.key
+  vpc_id                        = module.aws-vpc[each.key].vpc_id
+  public_subnet_ids             = module.aws-vpc[each.key].public_subnet_ids
+  private_subnet_ids            = module.aws-vpc[each.key].private_subnet_ids
   additional_private_subnet_ids = module.aws-vpc[each.key].additional_private_subnet_ids
   additional_private_subnet_associations = flatten([
     for k, v in module.aws-vpc[each.key].additional_private_subnet_ids : [
       for sn in v : {
-        subnet_id = sn
+        subnet_id    = sn
         subnet_group = k
-      } 
+      }
     ]
   ])
   public_subnet_nacl_rules = [for rule in each.value.public_subnet_nacl_rules : {
@@ -118,15 +118,15 @@ module "aws-nacl" {
 
 # Setup IGW and NAT Gateway
 module "aws-vpc-gw" {
-  source                          = "./modules/aws-vpc-gw"
-  depends_on                      = [module.aws-vpc]
-  for_each                        = var.network_config.vpcs
-  project_name                    = var.project_name
-  environment                     = var.environment
-  vpc_name                        = each.key
-  vpc_id                          = module.aws-vpc[each.key].vpc_id
-  public_subnet_ids               = module.aws-vpc[each.key].public_subnet_ids
-  private_subnet_ids              = concat(module.aws-vpc[each.key].private_subnet_ids, flatten([
+  source            = "./modules/aws-vpc-gw"
+  depends_on        = [module.aws-vpc]
+  for_each          = var.network_config.vpcs
+  project_name      = var.project_name
+  environment       = var.environment
+  vpc_name          = each.key
+  vpc_id            = module.aws-vpc[each.key].vpc_id
+  public_subnet_ids = module.aws-vpc[each.key].public_subnet_ids
+  private_subnet_ids = concat(module.aws-vpc[each.key].private_subnet_ids, flatten([
     for k, v in module.aws-vpc[each.key].additional_private_subnet_ids : [
       for sn in v : sn
     ]
@@ -151,8 +151,8 @@ module "aws-vpc-tgw" {
   environment  = var.environment
   vpcs = {
     for vpc in var.network_config.transit_gw.tgw_vpc_attach : vpc => {
-      vpc_id             = module.aws-vpc[vpc].vpc_id
-      public_subnet_ids  = module.aws-vpc[vpc].public_subnet_ids
+      vpc_id            = module.aws-vpc[vpc].vpc_id
+      public_subnet_ids = module.aws-vpc[vpc].public_subnet_ids
       private_subnet_ids = concat(module.aws-vpc[vpc].private_subnet_ids, flatten([
         for k, v in module.aws-vpc[vpc].additional_private_subnet_ids : [
           for sn in v : sn

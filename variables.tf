@@ -35,8 +35,8 @@ variable "network_config" {
         vpc_cidr_subnet_mask = number
         subnet_mask          = number
         additional_private_subnets = map(object({
-          subnet_count   = number
-          nacl_rules     = list(object({
+          subnet_count = number
+          nacl_rules = list(object({
             rule_number = number
             egress      = bool
             action      = string

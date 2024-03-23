@@ -7,17 +7,17 @@ mock_provider "aws" {
 }
 
 variables {
-  project_name            = "projecta"
-  environment             = "test"
-  vpc_name                = "infra1"
-  acct_ipam_scope_id      = "ipam-awefkanewgaweg"
-  acct_ipam_pool_id       = "ipam-awepfoinaerg"
-  acct_ipam_pool_cidr     = "10.0.0.0/8"
-  public_subnets          = 2
-  private_subnets         = 2
-  route_table_per_private = false
-  vpc_cidr_subnet_mask    = 16
-  subnet_mask             = 24
+  project_name               = "projecta"
+  environment                = "test"
+  vpc_name                   = "infra1"
+  acct_ipam_scope_id         = "ipam-awefkanewgaweg"
+  acct_ipam_pool_id          = "ipam-awepfoinaerg"
+  acct_ipam_pool_cidr        = "10.0.0.0/8"
+  public_subnets             = 2
+  private_subnets            = 2
+  route_table_per_private    = false
+  vpc_cidr_subnet_mask       = 16
+  subnet_mask                = 24
   additional_private_subnets = []
 }
 
