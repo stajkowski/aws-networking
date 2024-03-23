@@ -5,7 +5,8 @@ variable "vpcs" {
       {
         vpc_id             = string,
         private_subnet_ids = list(string),
-        public_subnet_ids  = list(string)
+        public_subnet_ids  = list(string),
+        additional_private_subnet_ids = list(string)
       }
     )
   )

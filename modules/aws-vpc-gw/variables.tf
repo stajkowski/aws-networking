@@ -18,6 +18,12 @@ variable "private_subnet_ids" {
   type        = list(string)
 }
 
+variable "additional_private_subnet_ids" {
+  description = "Additional Private Subnet IDs"
+  type        = list(string)
+  default     = []
+}
+
 variable "public_route_table_id" {
   description = "Public Route Table ID"
   type        = string

@@ -15,7 +15,7 @@ Terraform Module to simplify the creation of complex AWS VPC Networking configur
 
 ## Usage Example
 ```
-variables {
+locals {
   project_name           = "projecta"
   environment            = "test"
   parent_pool_cidr_block = "10.0.0.0/8"
@@ -235,13 +235,17 @@ variables {
   }
 }
 
+provider "aws" {
+  region = "us-west-2"
+}
+
 module "aws-networking" {
   source  = "stajkowski/networking/aws"
   version = "2.0.0"
   project_name = local.project_name
   environment = local.environment
   parent_pool_cidr_block = local.parent_pool_cidr_block
-  network_config = local.env_network_config[var.environment]
+  network_config = local.network_config
 }
 ```
 The following example will create:
