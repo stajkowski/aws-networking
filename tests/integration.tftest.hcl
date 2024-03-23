@@ -20,7 +20,7 @@ variables {
       "egress" = {
         public_subnets             = 2
         private_subnets            = 2
-        vpc_cidr_subnet_mask       = 24
+        vpc_cidr_subnet_mask       = 22
         subnet_mask                = 27
         additional_private_subnets = {}
         public_subnet_nacl_rules = [
