@@ -48,9 +48,9 @@ module "aws-vpc" {
   vpc_cidr_subnet_mask    = each.value.vpc_cidr_subnet_mask
   subnet_mask             = each.value.subnet_mask
   additional_private_subnets = flatten([
-    for subnet in each.value.additional_private_subnets : [
-      for i in range(subnet.subnet_count) : [
-        "${each.key}::${i + 1}::${i}"
+    for k, v in each.value.additional_private_subnets : [
+      for i in range(v.subnet_count) : [
+        "${k}::${i + 1}::${i}"
       ]
     ]
   ])
@@ -67,6 +67,15 @@ module "aws-nacl" {
   vpc_id             = module.aws-vpc[each.key].vpc_id
   public_subnet_ids  = module.aws-vpc[each.key].public_subnet_ids
   private_subnet_ids = module.aws-vpc[each.key].private_subnet_ids
+  additional_private_subnet_ids = module.aws-vpc[each.key].additional_private_subnet_ids
+  additional_private_subnet_associations = flatten([
+    for k, v in module.aws-vpc[each.key].additional_private_subnet_ids : [
+      for sn in v : {
+        subnet_id = sn
+        subnet_group = k
+      } 
+    ]
+  ])
   public_subnet_nacl_rules = [for rule in each.value.public_subnet_nacl_rules : {
     rule_number = rule.rule_number
     egress      = rule.egress
@@ -87,6 +96,20 @@ module "aws-nacl" {
       to_port     = rule.to_port
     }
   ]
+  additional_private_subnet_nacl_rules = flatten([
+    for k, v in each.value.additional_private_subnets : [
+      for rule in v.nacl_rules : {
+        rule_number = rule.rule_number
+        egress      = rule.egress
+        protocol    = rule.protocol
+        action      = rule.action
+        cidr_block  = can(lookup(var.network_config.vpcs, rule.cidr_block)) ? module.aws-vpc[rule.cidr_block].vpc_cidr_block : replace(rule.cidr_block, "ipam_account_pool", var.parent_pool_cidr_block)
+        from_port   = rule.from_port
+        to_port     = rule.to_port
+        subnet      = k
+      }
+    ]
+  ])
 }
 
 # Setup IGW and NAT Gateway

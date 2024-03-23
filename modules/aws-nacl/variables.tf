@@ -22,6 +22,12 @@ variable "private_subnet_ids" {
   type        = list(string)
 }
 
+variable "additional_private_subnet_ids" {
+  description = "Additional Private Subnet IDs"
+  type        = map(list(string))
+  default = {}
+}
+
 variable "public_subnet_nacl_rules" {
   description = "Public Subnet NACL Rules"
   type = list(object({
@@ -46,6 +52,30 @@ variable "private_subnet_nacl_rules" {
     cidr_block  = string
     from_port   = number
     to_port     = number
+  }))
+  default = []
+}
+
+variable "additional_private_subnet_nacl_rules" {
+  description = "Additional Private Subnet NACL Rules"
+  type = list(object({
+    rule_number = number
+    egress      = bool
+    action      = string
+    protocol    = string
+    cidr_block  = string
+    from_port   = number
+    to_port     = number
+    subnet      = string
+  }))
+  default = []
+}
+
+variable "additional_private_subnet_associations" {
+  description = "Additional Private Subnet Associations"
+  type = list(object({
+    subnet_id = string
+    subnet_group = string
   }))
   default = []
 }
