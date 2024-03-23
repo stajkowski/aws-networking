@@ -122,7 +122,11 @@ module "aws-vpc-gw" {
   vpc_name                        = each.key
   vpc_id                          = module.aws-vpc[each.key].vpc_id
   public_subnet_ids               = module.aws-vpc[each.key].public_subnet_ids
-  private_subnet_ids              = module.aws-vpc[each.key].private_subnet_ids
+  private_subnet_ids              = concat(module.aws-vpc[each.key].private_subnet_ids, flatten([
+    for k, v in module.aws-vpc[each.key].additional_private_subnet_ids : [
+      for sn in v : sn
+    ]
+  ]))
   public_route_table_id           = module.aws-vpc[each.key].public_route_table_id
   private_route_table_ids         = module.aws-vpc[each.key].private_route_table_ids
   igw_is_enabled                  = each.value.gw_services.igw_is_enabled
@@ -144,8 +148,12 @@ module "aws-vpc-tgw" {
   vpcs = {
     for vpc in var.network_config.transit_gw.tgw_vpc_attach : vpc => {
       vpc_id             = module.aws-vpc[vpc].vpc_id
-      private_subnet_ids = module.aws-vpc[vpc].private_subnet_ids
       public_subnet_ids  = module.aws-vpc[vpc].public_subnet_ids
+      private_subnet_ids = concat(module.aws-vpc[vpc].private_subnet_ids, flatten([
+        for k, v in module.aws-vpc[vpc].additional_private_subnet_ids : [
+          for sn in v : sn
+        ]
+      ]))
     }
   }
   # Setup route table routes for a many to many relationship due to HA
