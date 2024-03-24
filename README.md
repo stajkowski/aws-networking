@@ -19,6 +19,7 @@ locals {
   project_name           = "projecta"
   environment            = "test"
   parent_pool_cidr_block = "10.0.0.0/8"
+  ipam_scope_id          = null
   network_config = {
     vpcs = {
       "egress" = {
@@ -241,10 +242,11 @@ provider "aws" {
 
 module "aws-networking" {
   source  = "stajkowski/networking/aws"
-  version = "2.0.0"
+  version = "2.1.0"
   project_name = local.project_name
   environment = local.environment
   parent_pool_cidr_block = local.parent_pool_cidr_block
+  ipam_scope_id          = local.ipam_scope_id
   network_config = local.network_config
 }
 ```
@@ -323,6 +325,8 @@ The following example will create:
 |-----------|-----------|-----------|
 | project_name | Generally referred to as the namespace. This can be any value used to identify the parent set of objects created in the environment. | `string`
 | environment | Current environment stage to configure.  This value is only utilized in naming resources and applying tags. | `string`
+| parent_pool_cidr_block | CIDR block for Environment Parent VPC Pools, i.e. 10.0.0.0/8. | `string`
+| ipam_scope_id | Existing IPAM scope ID for Environment VPC Parent Pool Creation.  Use standard ARN format for Scope ID. i.e. `ipam-scope-04dd36eca6021f93e`.  | `string`
 | network_config | Network configuration values utilized to standup VPC resources. | `object()`
 
 #### Network Configuration Inputs
@@ -530,3 +534,14 @@ The following example will create:
 ## License
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+## About
+[![text](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/brian-stajkowski-a99b9b5/)
+
+### Brian Stajkowski
+With over 20 years of experience in the IT industry from networking to building cloud services at massive scale, DevOps has been a continued interest.  Feel free to use any or all of the modules contained in this respository, and submit any use cases that further expand this abstraction in bulding complex virtual networks in AWS.  Connect with me on LiknkedIn!
+
+https://www.linkedin.com/in/brian-stajkowski-a99b9b5/
+
+![Terraform](https://img.shields.io/badge/terraform-%235835CC.svg?style=for-the-badge&logo=terraform&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white)

@@ -15,6 +15,7 @@ variables {
   project_name           = "projecta"
   environment            = "test"
   parent_pool_cidr_block = "10.250.0.0/16"
+  ipam_scope_id          = null
   network_config = {
     vpcs = {
       "egress" = {

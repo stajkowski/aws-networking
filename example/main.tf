@@ -2,6 +2,7 @@ locals {
   project_name           = "projecta"
   environment            = "test"
   parent_pool_cidr_block = "10.0.0.0/8"
+  ipam_scope_id          = null
   network_config = {
     vpcs = {
       "egress" = {
@@ -227,5 +228,6 @@ module "aws-networking" {
   project_name           = local.project_name
   environment            = local.environment
   parent_pool_cidr_block = local.parent_pool_cidr_block
+  ipam_scope_id          = local.ipam_scope_id
   network_config         = local.network_config
 }

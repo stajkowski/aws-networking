@@ -24,3 +24,9 @@ variable "environment" {
     error_message = "Environment should be alphanumeric, can contain hyphens, and not be empty"
   }
 }
+
+variable "ipam_scope_id" {
+  description = "Override IPAM Scope ID to use for VPC/Subnet Assignment"
+  type        = string
+  default     = null
+}

@@ -9,11 +9,13 @@ variables {
       vpc_id             = "vpc-apwiefunawg"
       private_subnet_ids = ["sub1", "sub2"]
       public_subnet_ids  = ["sub3", "sub4"]
+      additional_private_subnet_ids = ["sub5", "sub6"]
     }
     "infra1" = {
       vpc_id             = "vpc-aaweoiuna9weg"
       private_subnet_ids = ["sub5", "sub6"]
       public_subnet_ids  = ["sub7", "sub8"]
+      additional_private_subnet_ids = ["sub5", "sub6"]
     }
   }
   route_table_routes = [
