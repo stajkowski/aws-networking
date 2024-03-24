@@ -25,6 +25,12 @@ variable "parent_pool_cidr_block" {
   }
 }
 
+variable "ipam_scope_id" {
+  description = "Override IPAM Scope ID to use for VPC/Subnet Assignment"
+  type        = string
+  default     = null
+}
+
 variable "network_config" {
   description = "Network Configuration"
   type = object(

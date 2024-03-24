@@ -29,6 +29,7 @@ module "aws-acct-ipam" {
   project_name           = var.project_name
   environment            = var.environment
   parent_pool_cidr_block = var.parent_pool_cidr_block
+  ipam_scope_id          = var.ipam_scope_id
 }
 
 # Create VPC with Public and Private Subnets
