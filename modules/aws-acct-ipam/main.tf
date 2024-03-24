@@ -18,7 +18,7 @@ data "aws_region" "current" {}
 
 #Create IPAM Scope for Account
 resource "aws_vpc_ipam" "region_ipam" {
-  count = var.ipam_scope_id == null ? 1 : 0
+  count       = var.ipam_scope_id == null ? 1 : 0
   description = "${var.project_name}-${var.environment}-account-ipan"
   operating_regions {
     region_name = data.aws_region.current.name

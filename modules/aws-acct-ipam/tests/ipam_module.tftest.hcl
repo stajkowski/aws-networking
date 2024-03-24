@@ -7,10 +7,10 @@ mock_provider "aws" {
 }
 
 variables {
-  project_name               = "projecta"
-  environment                = "test"
-  parent_pool_cidr_block     = "10.0.0.0/8"
-  ipam_scope_id              = null
+  project_name           = "projecta"
+  environment            = "test"
+  parent_pool_cidr_block = "10.0.0.0/8"
+  ipam_scope_id          = null
 }
 
 run "positive_standard_config" {
@@ -27,7 +27,7 @@ run "positive_ipam_scope_id_exists" {
   command = plan
 
   variables {
-    ipam_scope_id           = "ipam-scope-04dd36eca6021f93e"
+    ipam_scope_id = "ipam-scope-04dd36eca6021f93e"
   }
 
   assert {
