@@ -10,7 +10,7 @@
 # 2. Create NACLs for VPCs
 # 3. Create Internet Gateway, NAT Gateway, VPCE Gateway, or VPC Interface Endpoints
 # 4. Create Transit Gateway, Attach VPCs, and update VPC Route Tables
-# 5. Create Bastion Hosts in Specified VPCs
+# 5. Create Internet Monitor
 #
 # ---------------------------------------------------------------------------------------------------------------------
 
@@ -184,4 +184,24 @@ module "aws-vpc-tgw" {
     }
   ])
   tgw_vpc_attach = var.network_config.transit_gw.tgw_vpc_attach
+}
+
+data "aws_region" "current" {}
+data "aws_caller_identity" "current" {}
+
+# Create Internet Monitor
+resource "aws_internetmonitor_monitor" "internet_monitor" {
+  count = var.network_config.internet_monitor.is_enabled ? 1 : 0
+  depends_on = [ module.aws-vpc ]
+  monitor_name = "${var.project_name}-${var.environment}-internet-monitor"
+  resources = toset([
+    for vpc in var.network_config.internet_monitor.monitor_vpcs : "arn:aws:ec2:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:vpc/${module.aws-vpc[vpc].vpc_id}"
+  ])
+  max_city_networks_to_monitor = var.network_config.internet_monitor.max_city_networks_to_monitor
+  traffic_percentage_to_monitor = var.network_config.internet_monitor.traffic_percentage_to_monitor
+  health_events_config {
+    availability_score_threshold = var.network_config.internet_monitor.availability_threshold
+    performance_score_threshold  = var.network_config.internet_monitor.performance_threshold
+  }
+  status = var.network_config.internet_monitor.status
 }

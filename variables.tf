@@ -91,5 +91,14 @@ variable "network_config" {
           vpc_attachment = string
         }))
       })
+      internet_monitor = object({
+        is_enabled   = bool
+        monitor_vpcs = list(string)
+        traffic_percentage_to_monitor = number
+        max_city_networks_to_monitor = number
+        availability_threshold = number
+        performance_threshold = number
+        status = string
+      })
   })
 }

@@ -216,6 +216,15 @@ locals {
         }
       ]
     }
+    internet_monitor = {
+      is_enabled = true
+      monitor_vpcs = ["egress"]
+      traffic_percentage_to_monitor = 50
+      max_city_networks_to_monitor = 100
+      availability_threshold = 96
+      performance_threshold = 96
+      status = "ACTIVE"
+    }
   }
 }
 
