@@ -326,6 +326,9 @@ The following example will create:
 12. Route destination "0.0.0.0/0" is added to the private route tables in "infra1" VPC.
 13. Route destination "infra1" (auto substituted for infra 1 CIDR) is added to public/private route tables in "egress" VPC.
 14. A default security group that can be used per VPC that allows parent IPAM pool CIDR of "10.0.0.0/8"
+15. Internet Monitor enabled and monitoring egress VPC.
+16. SNS Topic for Internet Monitor Alerts and 1 subscription with email as the protocol.
+17. 2 CloudWatch alarms for Availability and Performances score utilizing the SNS topic for alerts.
 
 *NOTE*: Size of each VPC CIDR and subnet mask can be controlled through the configuration "vpc_cidr_subnet_mask" and "subnet_mask"
 
@@ -420,6 +423,17 @@ The following example will create:
 #### Network Configuration Inputs (Iternet Monitor)
 | Name      | Description   | Type    |
 |-----------|-----------|-----------|
+| internet_monitor.is_enabled | Boolean value to indicate that aws-networking should enable Internet Monitor. | `bool`
+| internet_monitor.monitor_vpcs | List of named VPCs to enable Internet Monitor. | `list(string)`
+| internet_monitor.traffic_percentage_to_monitor | https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/IMTrafficPercentage.html | `number`
+| internet_monitor.max_city_networks_to_monitor | https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/IMCityNetworksMaximum.html | `number`
+| internet_monitor.availability_threshold | https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-IM-overview.html#IMUpdateThresholdFromOverview | `number`
+| internet_monitor.performance_threshold | https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-IM-overview.html#IMUpdateThresholdFromOverview | `number`
+| internet_monitor.status | (`ACTIVE`,`INACTIVE`) Set Internet Monitor status. | `number`
+| internet_monitor.alarm_config | Iternet Monitor alarm configuration for SNS Topics, Subscriptions, and CloudWatch Alarms. | `object()`
+| internet_monitor.alarm_config.sns_topics | Named SNS Topics created based on key value.  Object value not used and reserved for future use. | `map()`
+| internet_monitor.alarm_config.sns_subscriptions | List of objects containing the SNS subscriptions: topic, protocol, and endpoint. https://docs.aws.amazon.com/sns/latest/api/API_Subscribe.html | `object()`
+| internet_monitor.alarm_config.alarms | Map of alarms to create, please refer to CloudWatch documentation on exact settings to support your use case: https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_PutMetricAlarm.html | `map(object())`
 
 ## Revision Updates
 

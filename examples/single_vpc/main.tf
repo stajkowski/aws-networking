@@ -132,17 +132,58 @@ locals {
         tgw_routes = []
       }
       internet_monitor = {
-        is_enabled                    = false
-        monitor_vpcs                  = []
+        is_enabled                    = true
+        monitor_vpcs                  = ["webapp"]
         traffic_percentage_to_monitor = 50
         max_city_networks_to_monitor  = 100
         availability_threshold        = 96
         performance_threshold         = 96
         status                        = "ACTIVE"
         alarm_config = {
-          sns_topics = {}
-          sns_subscriptions = []
-          alarms = {}
+          sns_topics = {
+            "webapp-alarms" = {}
+          }
+          sns_subscriptions = [
+            {
+              topic    = "webapp-alarms"
+              protocol = "email"
+              endpoint = "infra-alerts@example.com"
+            }
+          ]
+          alarms = {
+            "egress-availability-score" = {
+              description         = "AWS Iternet Monitor Webapp availability score less than 96 for 5m."
+              comparison          = "LessThanThreshold"
+              metric_name         = "AvailabilityScore"
+              namespace           = "AWS/InternetMonitor"
+              statistic           = "Average"
+              period              = 300
+              threshold           = 96
+              evaluation_periods  = 2
+              datapoints_to_alarm = 2
+              actions_enabled     = true
+              treat_missing_data  = "missing"
+              alarm_actions = [
+                "webapp-alarms"
+              ]
+            }
+            "egress-performance-score" = {
+              description         = "AWS Iternet Monitor Webapp performance score less than 96 for 5m."
+              comparison          = "LessThanThreshold"
+              metric_name         = "PerformanceScore"
+              namespace           = "AWS/InternetMonitor"
+              statistic           = "Average"
+              period              = 300
+              threshold           = 96
+              evaluation_periods  = 2
+              datapoints_to_alarm = 2
+              actions_enabled     = true
+              treat_missing_data  = "missing"
+              alarm_actions = [
+                "webapp-alarms"
+              ]
+            }
+          }
         }
       }
     }
