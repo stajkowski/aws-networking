@@ -14,6 +14,7 @@ Terraform Module to simplify the creation of complex AWS VPC Networking configur
 - [License](#license)
 
 ## Usage Example
+*More examples can be found in [Examples](https://github.com/stajkowski/terraform-aws-networking/tree/main/examples)
 ```
 locals {
   project_name           = "projecta"
@@ -21,217 +22,274 @@ locals {
   parent_pool_cidr_block = "10.0.0.0/8"
   ipam_scope_id          = null
   network_config = {
-    vpcs = {
-      "egress" = {
-        public_subnets       = 2
-        private_subnets      = 2
-        vpc_cidr_subnet_mask = 16
-        subnet_mask          = 24
-        additional_private_subnets   = {}
-        public_subnet_nacl_rules = [
-          {
-            rule_number = 10
-            egress      = false
-            action      = "allow"
-            protocol    = 6
-            cidr_block  = "0.0.0.0/0"
-            from_port   = 443
-            to_port     = 443
-          },
-          {
-            rule_number = 20
-            egress      = false
-            action      = "allow"
-            protocol    = 6
-            cidr_block  = "0.0.0.0/0"
-            from_port   = 80
-            to_port     = 80
-          },
-          {
-            rule_number = 10
-            egress      = true
-            action      = "allow"
-            protocol    = -1
-            cidr_block  = "0.0.0.0/0"
-            from_port   = 0
-            to_port     = 0
-          }
-        ]
-        private_subnet_nacl_rules = [
-          {
-            rule_number = 10
-            egress      = false
-            action      = "allow"
-            protocol    = -1
-            cidr_block  = "infra1"
-            from_port   = 0
-            to_port     = 0
-          },
-          {
-            rule_number = 20
-            egress      = false
-            action      = "allow"
-            protocol    = 6
-            cidr_block  = "ipam_account_pool"
-            from_port   = 22
-            to_port     = 22
-          },
-          {
-            rule_number = 10
-            egress      = true
-            action      = "allow"
-            protocol    = -1
-            cidr_block  = "0.0.0.0/0"
-            from_port   = 0
-            to_port     = 0
-          }
-        ]
-        gw_services = {
-          igw_is_enabled       = true
-          nat_gw_is_enabled    = true
-          nat_gw_type          = "public"
-          nat_gw_ha            = true
-          vpc_gateway_services = ["s3"]
-          vpc_interface_services = [
-            "ec2", "sts"
+    "test" = {
+      vpcs = {
+        "egress" = {
+          public_subnets             = 2
+          private_subnets            = 2
+          vpc_cidr_subnet_mask       = 16
+          subnet_mask                = 24
+          additional_private_subnets = {}
+          public_subnet_nacl_rules = [
+            {
+              rule_number = 10
+              egress      = false
+              action      = "allow"
+              protocol    = 6
+              cidr_block  = "0.0.0.0/0"
+              from_port   = 443
+              to_port     = 443
+            },
+            {
+              rule_number = 20
+              egress      = false
+              action      = "allow"
+              protocol    = 6
+              cidr_block  = "0.0.0.0/0"
+              from_port   = 80
+              to_port     = 80
+            },
+            {
+              rule_number = 10
+              egress      = true
+              action      = "allow"
+              protocol    = -1
+              cidr_block  = "0.0.0.0/0"
+              from_port   = 0
+              to_port     = 0
+            }
           ]
-          vpc_interface_services_scope = "private"
-        }
-        tgw_config = {
-          route_destinations = ["infra1"]
-        }
-      }
-      "infra1" = {
-        public_subnets       = 0
-        private_subnets      = 2
-        vpc_cidr_subnet_mask = 16
-        subnet_mask          = 24
-        additional_private_subnets   = {
-          "db" = {
-            subnet_count = 2
-            nacl_rules = [
-              {
-                rule_number = 10
-                egress      = false
-                action      = "allow"
-                protocol    = 6
-                cidr_block  = "infra1"
-                from_port   = 3306
-                to_port     = 3306
-              },
-              {
-                rule_number = 20
-                egress      = false
-                action      = "allow"
-                protocol    = 6
-                cidr_block  = "ipam_account_pool"
-                from_port   = 1024
-                to_port     = 65535
-              },
-              {
-                rule_number = 10
-                egress      = true
-                action      = "allow"
-                protocol    = -1
-                cidr_block  = "ipam_account_pool"
-                from_port   = 0
-                to_port     = 0
-              }
+          private_subnet_nacl_rules = [
+            {
+              rule_number = 10
+              egress      = false
+              action      = "allow"
+              protocol    = -1
+              cidr_block  = "infra1"
+              from_port   = 0
+              to_port     = 0
+            },
+            {
+              rule_number = 20
+              egress      = false
+              action      = "allow"
+              protocol    = 6
+              cidr_block  = "ipam_account_pool"
+              from_port   = 22
+              to_port     = 22
+            },
+            {
+              rule_number = 10
+              egress      = true
+              action      = "allow"
+              protocol    = -1
+              cidr_block  = "0.0.0.0/0"
+              from_port   = 0
+              to_port     = 0
+            }
+          ]
+          gw_services = {
+            igw_is_enabled       = true
+            nat_gw_is_enabled    = true
+            nat_gw_type          = "public"
+            nat_gw_ha            = true
+            vpc_gateway_services = ["s3"]
+            vpc_interface_services = [
+              "ec2", "sts"
             ]
+            vpc_interface_services_scope = "private"
+          }
+          tgw_config = {
+            route_destinations = ["infra1"]
           }
         }
-        public_subnet_nacl_rules = [
-          {
-            rule_number = 10
-            egress      = false
-            action      = "allow"
-            protocol    = 6
-            cidr_block  = "0.0.0.0/0"
-            from_port   = 443
-            to_port     = 443
-          },
-          {
-            rule_number = 20
-            egress      = false
-            action      = "allow"
-            protocol    = 6
-            cidr_block  = "0.0.0.0/0"
-            from_port   = 80
-            to_port     = 80
-          },
-          {
-            rule_number = 30
-            egress      = false
-            action      = "allow"
-            protocol    = 6
-            cidr_block  = "0.0.0.0/0"
-            from_port   = 1024
-            to_port     = 65535
-          },
-          {
-            rule_number = 10
-            egress      = true
-            action      = "allow"
-            protocol    = -1
-            cidr_block  = "0.0.0.0/0"
-            from_port   = 0
-            to_port     = 0
+        "infra1" = {
+          public_subnets       = 0
+          private_subnets      = 2
+          vpc_cidr_subnet_mask = 16
+          subnet_mask          = 24
+          additional_private_subnets = {
+            "db" = {
+              subnet_count = 2
+              nacl_rules = [
+                {
+                  rule_number = 10
+                  egress      = false
+                  action      = "allow"
+                  protocol    = 6
+                  cidr_block  = "infra1"
+                  from_port   = 3306
+                  to_port     = 3306
+                },
+                {
+                  rule_number = 20
+                  egress      = false
+                  action      = "allow"
+                  protocol    = 6
+                  cidr_block  = "ipam_account_pool"
+                  from_port   = 1024
+                  to_port     = 65535
+                },
+                {
+                  rule_number = 10
+                  egress      = true
+                  action      = "allow"
+                  protocol    = -1
+                  cidr_block  = "ipam_account_pool"
+                  from_port   = 0
+                  to_port     = 0
+                }
+              ]
+            }
           }
-        ]
-        private_subnet_nacl_rules = [
-          {
-            rule_number = 10
-            egress      = false
-            action      = "allow"
-            protocol    = 6
-            cidr_block  = "0.0.0.0/0"
-            from_port   = 1024
-            to_port     = 65535
-          },
-          {
-            rule_number = 20
-            egress      = false
-            action      = "allow"
-            protocol    = 6
-            cidr_block  = "egress"
-            from_port   = 22
-            to_port     = 22
-          },
-          {
-            rule_number = 10
-            egress      = true
-            action      = "allow"
-            protocol    = -1
-            cidr_block  = "0.0.0.0/0"
-            from_port   = 0
-            to_port     = 0
-          }
-        ]
-        gw_services = {
-          igw_is_enabled       = false
-          nat_gw_is_enabled    = false
-          nat_gw_type          = "private"
-          nat_gw_ha            = false
-          vpc_gateway_services = []
-          vpc_interface_services = [
-            "ec2", "sts"
+          public_subnet_nacl_rules = [
+            {
+              rule_number = 10
+              egress      = false
+              action      = "allow"
+              protocol    = 6
+              cidr_block  = "0.0.0.0/0"
+              from_port   = 443
+              to_port     = 443
+            },
+            {
+              rule_number = 20
+              egress      = false
+              action      = "allow"
+              protocol    = 6
+              cidr_block  = "0.0.0.0/0"
+              from_port   = 80
+              to_port     = 80
+            },
+            {
+              rule_number = 30
+              egress      = false
+              action      = "allow"
+              protocol    = 6
+              cidr_block  = "0.0.0.0/0"
+              from_port   = 1024
+              to_port     = 65535
+            },
+            {
+              rule_number = 10
+              egress      = true
+              action      = "allow"
+              protocol    = -1
+              cidr_block  = "0.0.0.0/0"
+              from_port   = 0
+              to_port     = 0
+            }
           ]
-          vpc_interface_services_scope = "private"
-        }
-        tgw_config = {
-          route_destinations = ["0.0.0.0/0"]
+          private_subnet_nacl_rules = [
+            {
+              rule_number = 10
+              egress      = false
+              action      = "allow"
+              protocol    = 6
+              cidr_block  = "0.0.0.0/0"
+              from_port   = 1024
+              to_port     = 65535
+            },
+            {
+              rule_number = 20
+              egress      = false
+              action      = "allow"
+              protocol    = 6
+              cidr_block  = "egress"
+              from_port   = 22
+              to_port     = 22
+            },
+            {
+              rule_number = 10
+              egress      = true
+              action      = "allow"
+              protocol    = -1
+              cidr_block  = "0.0.0.0/0"
+              from_port   = 0
+              to_port     = 0
+            }
+          ]
+          gw_services = {
+            igw_is_enabled       = false
+            nat_gw_is_enabled    = false
+            nat_gw_type          = "private"
+            nat_gw_ha            = false
+            vpc_gateway_services = []
+            vpc_interface_services = [
+              "ec2", "sts"
+            ]
+            vpc_interface_services_scope = "private"
+          }
+          tgw_config = {
+            route_destinations = ["0.0.0.0/0"]
+          }
         }
       }
-    }
-    transit_gw = {
-      tgw_is_enabled = true
-      tgw_vpc_attach = ["infra1", "egress"]
-      tgw_routes = [
-        {
-          "destination" = "0.0.0.0/0"
-          "vpc_attachment"  = "egress"
+      transit_gw = {
+        tgw_is_enabled = true
+        tgw_vpc_attach = ["infra1", "egress"]
+        tgw_routes = [
+          {
+            "destination"    = "0.0.0.0/0"
+            "vpc_attachment" = "egress"
+          }
+        ]
+      }
+      internet_monitor = {
+        is_enabled                    = true
+        monitor_vpcs                  = ["egress"]
+        traffic_percentage_to_monitor = 50
+        max_city_networks_to_monitor  = 100
+        availability_threshold        = 96
+        performance_threshold         = 96
+        status                        = "ACTIVE"
+        alarm_config = {
+          sns_topics = {
+            "egress-alarms" = {}
+          }
+          sns_subscriptions = [
+            {
+              topic    = "egress-alarms"
+              protocol = "email"
+              endpoint = "infra-alerts@example.com"
+            }
+          ]
+          alarms = {
+            "egress-availability-score" = {
+              description         = "AWS Iternet Monitor Egress availability score less than 96 for 5m."
+              comparison          = "LessThanThreshold"
+              metric_name         = "AvailabilityScore"
+              namespace           = "AWS/InternetMonitor"
+              statistic           = "Average"
+              period              = 300
+              threshold           = 96
+              evaluation_periods  = 2
+              datapoints_to_alarm = 2
+              actions_enabled     = true
+              treat_missing_data  = "missing"
+              alarm_actions = [
+                "egress-alarms"
+              ]
+            }
+            "egress-performance-score" = {
+              description         = "AWS Iternet Monitor Egress performance score less than 96 for 5m."
+              comparison          = "LessThanThreshold"
+              metric_name         = "PerformanceScore"
+              namespace           = "AWS/InternetMonitor"
+              statistic           = "Average"
+              period              = 300
+              threshold           = 96
+              evaluation_periods  = 2
+              datapoints_to_alarm = 2
+              actions_enabled     = true
+              treat_missing_data  = "missing"
+              alarm_actions = [
+                "egress-alarms"
+              ]
+            }
+          }
         }
-      ]
+      }
     }
   }
 }
@@ -241,13 +299,13 @@ provider "aws" {
 }
 
 module "aws-networking" {
-  source  = "stajkowski/networking/aws"
-  version = "2.1.0"
-  project_name = local.project_name
-  environment = local.environment
+  source                 = "stajkowski/networking/aws"
+  version                = "2.1.0"
+  project_name           = local.project_name
+  environment            = local.environment
   parent_pool_cidr_block = local.parent_pool_cidr_block
   ipam_scope_id          = local.ipam_scope_id
-  network_config = local.network_config
+  network_config         = local.network_config[local.environment]
 }
 ```
 The following example will create:
@@ -327,9 +385,9 @@ The following example will create:
 | environment | Current environment stage to configure.  This value is only utilized in naming resources and applying tags. | `string`
 | parent_pool_cidr_block | CIDR block for Environment Parent VPC Pools, i.e. 10.0.0.0/8. | `string`
 | ipam_scope_id | Existing IPAM scope ID for Environment VPC Parent Pool Creation.  Use standard ARN format for Scope ID. i.e. `ipam-scope-04dd36eca6021f93e`.  | `string`
-| network_config | Network configuration values utilized to standup VPC resources. | `object()`
+| network_config | Network configuration values utilized to standup VPC resources. `object({vpcs={},transit_gw={},internet_monitor={}})` | `object()`
 
-#### Network Configuration Inputs
+#### Network Configuration Inputs (VPC)
 | Name      | Description   | Type    |
 |-----------|-----------|-----------|
 | vpcs.public_subnets | Number of public subnets to create in the VPC.  This is required to be > 0 if an Internet Gateway is configured for the VPC. | `number`
@@ -349,15 +407,23 @@ The following example will create:
 | vpcs.public_subnet_nacl_rules | This will iterate over the configured NACL rules and assign them to the public subnet ids. This is direct configuration of NACL Rules in AWS with support for dynamic names of VPCs in the cidr_block within aws-networking module.  It is possible to supply a standard CIDR for `cidr_block` such as "10.0.0.0/8" or "0.0.0.0/0", but alternatively you can pass the key value under "vpcs", which is the name of your VPC.  aws-networking module will then replace the VPC name with the assigned CIDR.  Additionally, `ipam_account_pool` can be set for the `cidr_block` to replace this value with the configured account level pool or parent pool. | `list(object())`
 | vpcs.private_subnet_nacl_rules | This will iterate over the configured NACL rules and assign them to the private subnet ids. This is direct configuration of NACL Rules in AWS with support for dynamic names of VPCs in the cidr_block within aws-networking module.  It is possible to supply a standard CIDR  for `cidr_block` such as "10.0.0.0/8" or "0.0.0.0/0", but alternatively you can pass the key value under "vpcs", which is the name of your VPC.  aws-networking module will then replace the VPC name with the assigned CIDR. Additionally, `ipam_account_pool` can be set for the `cidr_block` to replace this value with the configured account level pool or parent pool. | `list(object())`
 | vpcs.tgw_config.route_destinations | This will configure routes within the VPC Route Tables to the Transit Gateway. The configured value can be static, such as "0.0.0.0/0", or dynamic, similar to the NACL rules.  When using dynamic, utilize the VPC name you assigned to the VPC under "vpcs".  aws-networking module will replace the VPC name with the assigned CIDR. | `list(string)`
+
+#### Network Configuration Inputs (Transit Gateway)
+| Name      | Description   | Type    |
+|-----------|-----------|-----------|
 | transit_gw.tgw_is_enabled | Boolean value to indicate that aws-networking should create a Transit Gateway. | `bool`
 | transit_gw.tgw_vpc_attach | List of named VPCs to attach to the Transit Gateway. | `list(string)`
 | transit_gw.tgw_routes | List of routes to add into the Transit Gateway. | `list(object())`
 | transit_gw.tgw_routes.*.destination | Destination route, such as `0.0.0.0/0` or a VPC name like `egress`. | `string`
 | transit_gw.tgw_routes.*.vpc_attachment | Name of the VPC that is attached to Transit Gateway in `transit_gw.tgw_vpc_attach`. This will point the destination toward the VPC named in this parameter. | `string`
 
-## Major Revision Updates
+#### Network Configuration Inputs (Iternet Monitor)
+| Name      | Description   | Type    |
+|-----------|-----------|-----------|
 
-#### Version 1.0 (Initial Release)
+## Revision Updates
+
+#### Version 1.0.0 (Initial Release)
 
 1. Support for any number of VPCs.
 2. Creation of a dynamic set of public and private subnets.
@@ -374,9 +440,14 @@ The following example will create:
 13. Transit Gateway with VPC assignment.
 14. Transit Gateway route updates for every route table in the assigned VPC.
 
-#### Version 2.0
+#### Version 2.0.0
 
 1. Support for additional named private subnets.
+
+#### Version 2.1.0
+
+1. Add observability with configuration of Internet Monitor for selected VPCs.
+2. Add support to configure SNS topics, subscriptions and alarms for Iternet Monitor.
 
 ## Required Permissions
 ```
@@ -408,6 +479,29 @@ The following example will create:
 				"ec2:DeleteIpamPool",
 				"ec2:GetIpamPoolAllocations",
 				"iam:CreateServiceLinkedRole"
+			],
+			"Resource": "*"
+		},
+		{
+			"Sid": "InternetMonitor",
+			"Effect": "Allow",
+			"Action": [
+				"internetmonitor:*",
+				"sns:CreateTopic",
+				"sns:DeleteTopic",
+				"sns:GetTopicAttributes",
+				"sns:ListSubscriptionsByTopic",
+				"sns:ListTagsForResource",
+				"sns:SetTopicAttributes",
+				"sns:Subscribe",
+				"sns:Unsubscribe",
+				"cloudwatch:DeleteAlarms",
+				"cloudwatch:DescribeAlarms",
+				"cloudwatch:DisableAlarmActions",
+				"cloudwatch:EnableAlarmActions",
+				"cloudwatch:PutMetricAlarm",
+				"cloudwatch:TagResource",
+				"cloudwatch:UntagResource"
 			],
 			"Resource": "*"
 		},
@@ -471,7 +565,6 @@ The following example will create:
 				"ec2:DeleteVpc",
 				"ec2:DeleteVpcEndpoints",
 				"ec2:DeleteVpcEndpointServiceConfigurations",
-				"ec2:DeleteDhcpOptions",
 				"ec2:DescribeAccountAttributes",
 				"ec2:DescribeAddresses",
 				"ec2:DescribeAvailabilityZones",
@@ -523,7 +616,8 @@ The following example will create:
 				"ec2:RevokeSecurityGroupEgress",
 				"ec2:SearchTransitGatewayRoutes",
 				"ec2:UnassignIpv6Addresses",
-				"ec2:UnassignPrivateIpAddresses"
+				"ec2:UnassignPrivateIpAddresses",
+				"ec2:DeleteDhcpOptions"
 			],
 			"Resource": "*"
 		}

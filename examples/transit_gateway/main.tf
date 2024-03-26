@@ -218,13 +218,13 @@ locals {
         ]
       }
       internet_monitor = {
-        is_enabled = true
-        monitor_vpcs = ["egress"]
+        is_enabled                    = true
+        monitor_vpcs                  = ["egress"]
         traffic_percentage_to_monitor = 50
-        max_city_networks_to_monitor = 100
-        availability_threshold = 96
-        performance_threshold = 96
-        status = "ACTIVE"
+        max_city_networks_to_monitor  = 100
+        availability_threshold        = 96
+        performance_threshold         = 96
+        status                        = "ACTIVE"
         alarm_config = {
           sns_topics = {
             "egress-alarms" = {}
@@ -281,7 +281,7 @@ provider "aws" {
 }
 
 module "aws-networking" {
-  source                 = "../"
+  source                 = "../../"
   project_name           = local.project_name
   environment            = local.environment
   parent_pool_cidr_block = local.parent_pool_cidr_block

@@ -92,17 +92,17 @@ variable "network_config" {
         }))
       })
       internet_monitor = object({
-        is_enabled   = bool
-        monitor_vpcs = list(string)
+        is_enabled                    = bool
+        monitor_vpcs                  = list(string)
         traffic_percentage_to_monitor = number
-        max_city_networks_to_monitor = number
-        availability_threshold = number
-        performance_threshold = number
-        status = string
+        max_city_networks_to_monitor  = number
+        availability_threshold        = number
+        performance_threshold         = number
+        status                        = string
         alarm_config = object({
           sns_topics = map(object({}))
           sns_subscriptions = list(object({
-            topic = string
+            topic    = string
             protocol = string
             endpoint = string
           }))
@@ -118,7 +118,7 @@ variable "network_config" {
             datapoints_to_alarm = number
             actions_enabled     = bool
             treat_missing_data  = string
-            alarm_actions = list(string)
+            alarm_actions       = list(string)
           }))
         })
       })

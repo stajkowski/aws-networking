@@ -193,21 +193,21 @@ data "aws_caller_identity" "current" {}
 
 locals {
   alarm_config = var.network_config.internet_monitor.is_enabled ? var.network_config.internet_monitor.alarm_config : {
-    sns_topics = {}
+    sns_topics        = {}
     sns_subscriptions = []
-    alarms = {}
+    alarms            = {}
   }
 }
 
 # Create Internet Monitor
 resource "aws_internetmonitor_monitor" "internet_monitor" {
-  count = var.network_config.internet_monitor.is_enabled ? 1 : 0
-  depends_on = [ module.aws-vpc ]
+  count        = var.network_config.internet_monitor.is_enabled ? 1 : 0
+  depends_on   = [module.aws-vpc]
   monitor_name = "${var.project_name}-${var.environment}-internet-monitor"
   resources = toset([
     for vpc in var.network_config.internet_monitor.monitor_vpcs : "arn:aws:ec2:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:vpc/${module.aws-vpc[vpc].vpc_id}"
   ])
-  max_city_networks_to_monitor = var.network_config.internet_monitor.max_city_networks_to_monitor
+  max_city_networks_to_monitor  = var.network_config.internet_monitor.max_city_networks_to_monitor
   traffic_percentage_to_monitor = var.network_config.internet_monitor.traffic_percentage_to_monitor
   health_events_config {
     availability_score_threshold = var.network_config.internet_monitor.availability_threshold
@@ -218,8 +218,8 @@ resource "aws_internetmonitor_monitor" "internet_monitor" {
 
 # Create SNS Topics
 resource "aws_sns_topic" "sns_topics" {
-  for_each   = local.alarm_config.sns_topics
-  name       = "${var.project_name}-${var.environment}-${each.key}"
+  for_each = local.alarm_config.sns_topics
+  name     = "${var.project_name}-${var.environment}-${each.key}"
 }
 
 # Create SNS Subscriptions
@@ -244,11 +244,11 @@ resource "aws_cloudwatch_metric_alarm" "internet_monitor_alarms" {
   period              = each.value.period
   statistic           = each.value.statistic
   threshold           = each.value.threshold
-  treat_missing_data  = each.value.treat_missing_data 
+  treat_missing_data  = each.value.treat_missing_data
 
   dimensions = {
     "MonitorName" : aws_internetmonitor_monitor.internet_monitor[0].monitor_name
-    "MeasurementSource": "AWS"
+    "MeasurementSource" : "AWS"
   }
   actions_enabled = each.value.actions_enabled
   alarm_actions   = [for action in each.value.alarm_actions : aws_sns_topic.sns_topics[action].arn]
