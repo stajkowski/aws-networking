@@ -42,6 +42,13 @@ resource "aws_internetmonitor_monitor" "internet_monitor" {
     performance_score_threshold  = var.internet_monitor_config.performance_threshold
   }
   status = var.internet_monitor_config.status
+
+  lifecycle {
+    precondition {
+      condition     = !contains([for vpc in var.internet_monitor_config.monitor_vpcs : contains(keys(var.aws_vpc), vpc)], false)
+      error_message = "Invalid VPC for Internet Monitor. Does not exist."
+    }
+  }
 }
 
 # Create SNS Topics

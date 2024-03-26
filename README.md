@@ -458,10 +458,11 @@ The following example will create:
 
 1. Support for additional named private subnets.
 
-#### Version 2.1.0
+#### Version 2.2.0
 
-1. Add observability with configuration of Internet Monitor for selected VPCs.
-2. Add support to configure SNS topics, subscriptions and alarms for Iternet Monitor.
+1. [2.1.0] Add support to configure existing IPAM scope ID.
+2. Add observability with configuration of Internet Monitor for selected VPCs.
+3. Add support to configure SNS topics, subscriptions and alarms for Iternet Monitor.
 
 ## Required Permissions
 ```

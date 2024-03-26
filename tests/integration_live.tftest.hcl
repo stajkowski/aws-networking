@@ -220,6 +220,61 @@ variables {
         }
       ]
     }
+    internet_monitor = {
+      is_enabled                    = true
+      monitor_vpcs                  = ["egress"]
+      traffic_percentage_to_monitor = 50
+      max_city_networks_to_monitor  = 100
+      availability_threshold        = 96
+      performance_threshold         = 96
+      status                        = "ACTIVE"
+      alarm_config = {
+        sns_topics = {
+          "egress-alarms" = {}
+        }
+        sns_subscriptions = [
+          {
+            topic    = "egress-alarms"
+            protocol = "email"
+            endpoint = "infra-alerts@example.com"
+          }
+        ]
+        alarms = {
+          "egress-availability-score" = {
+            description         = "AWS Iternet Monitor Egress availability score less than 96 for 5m."
+            comparison          = "LessThanThreshold"
+            metric_name         = "AvailabilityScore"
+            namespace           = "AWS/InternetMonitor"
+            statistic           = "Average"
+            period              = 300
+            threshold           = 96
+            evaluation_periods  = 2
+            datapoints_to_alarm = 2
+            actions_enabled     = true
+            treat_missing_data  = "missing"
+            alarm_actions = [
+              "egress-alarms"
+            ]
+          }
+          "egress-performance-score" = {
+            description         = "AWS Iternet Monitor Egress performance score less than 96 for 5m."
+            comparison          = "LessThanThreshold"
+            metric_name         = "PerformanceScore"
+            namespace           = "AWS/InternetMonitor"
+            statistic           = "Average"
+            period              = 300
+            threshold           = 96
+            evaluation_periods  = 2
+            datapoints_to_alarm = 2
+            actions_enabled     = true
+            treat_missing_data  = "missing"
+            alarm_actions = [
+              "egress-alarms"
+            ]
+          }
+        }
+      }
+    }
   }
 }
 

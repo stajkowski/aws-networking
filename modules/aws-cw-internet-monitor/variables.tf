@@ -36,7 +36,7 @@ variable "internet_monitor_config" {
 variable "aws_vpc" {
   description = "Configured VPCs"
   type = map(object({
-    vpc_id             = string
+    vpc_id = string
   }))
 }
 

@@ -7,10 +7,10 @@ locals {
     "test" = {
       vpcs = {
         "webapp" = {
-          public_subnets             = 2
-          private_subnets            = 2
-          vpc_cidr_subnet_mask       = 16
-          subnet_mask                = 24
+          public_subnets       = 2
+          private_subnets      = 2
+          vpc_cidr_subnet_mask = 16
+          subnet_mask          = 24
           additional_private_subnets = {
             "db" = {
               subnet_count = 2
@@ -113,12 +113,12 @@ locals {
             }
           ]
           gw_services = {
-            igw_is_enabled       = true
-            nat_gw_is_enabled    = true
-            nat_gw_type          = "public"
-            nat_gw_ha            = false
-            vpc_gateway_services = []
-            vpc_interface_services = []
+            igw_is_enabled               = true
+            nat_gw_is_enabled            = true
+            nat_gw_type                  = "public"
+            nat_gw_ha                    = false
+            vpc_gateway_services         = []
+            vpc_interface_services       = []
             vpc_interface_services_scope = "private"
           }
           tgw_config = {
@@ -129,7 +129,7 @@ locals {
       transit_gw = {
         tgw_is_enabled = false
         tgw_vpc_attach = []
-        tgw_routes = []
+        tgw_routes     = []
       }
       internet_monitor = {
         is_enabled                    = true
