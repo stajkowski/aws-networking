@@ -10,7 +10,7 @@
 # 2. Create NACLs for VPCs
 # 3. Create Internet Gateway, NAT Gateway, VPCE Gateway, or VPC Interface Endpoints
 # 4. Create Transit Gateway, Attach VPCs, and update VPC Route Tables
-# 5. Create Bastion Hosts in Specified VPCs
+# 5. Create Internet Monitor
 #
 # ---------------------------------------------------------------------------------------------------------------------
 
@@ -184,4 +184,14 @@ module "aws-vpc-tgw" {
     }
   ])
   tgw_vpc_attach = var.network_config.transit_gw.tgw_vpc_attach
+}
+
+# Create Internet Monitor
+module "aws-cw-internet-monitor" {
+  source                  = "./modules/aws-cw-internet-monitor"
+  depends_on              = [module.aws-vpc]
+  project_name            = var.project_name
+  environment             = var.environment
+  internet_monitor_config = var.network_config.internet_monitor
+  aws_vpc                 = module.aws-vpc
 }
