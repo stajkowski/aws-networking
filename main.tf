@@ -197,22 +197,33 @@ module "aws-cw-internet-monitor" {
   aws_vpc                 = module.aws-vpc
 }
 
-
-
-
 # Create Client VPN Certs in ACM
+resource "null_resource" "generate_certs" {
+  provisioner "local-exec" {
+   command = "${path.module}/bin/run_generate_vpn_certs.sh"
+  }
+}
+
 resource "aws_acm_certificate" "server_vpn_cert" {
-  count             = var.network_config.vpn.client_vpn.is_enabled && fileexists("${path.module}/config/vpn/server.crt") ? 1 : 0
-  certificate_body  = file("${path.module}/config/vpn/server.crt")
-  private_key       = file("${path.module}/config/vpn/server.key")
-  certificate_chain = file("${path.module}/config/vpn/ca.crt")
+  count             = var.network_config.vpn.client_vpn.is_enabled ? 1 : 0
+  depends_on = [ null_resource.generate_certs ]
+  certificate_body  = fileexists("${path.root}/config/vpn/server.crt") ? file("${path.root}/config/vpn/server.crt") : ""
+  private_key       = fileexists("${path.root}/config/vpn/server.crt") ? file("${path.root}/config/vpn/server.key"): ""
+  certificate_chain = fileexists("${path.root}/config/vpn/server.crt") ? file("${path.root}/config/vpn/ca.crt") : ""
+  lifecycle { 
+    ignore_changes = [certificate_body, private_key, certificate_chain]
+  }
 }
 
 resource "aws_acm_certificate" "client_vpn_cert" {
-  count             = var.network_config.vpn.client_vpn.is_enabled && fileexists("${path.module}/config/vpn/client.crt") ? 1 : 0
-  certificate_body  = file("${path.module}/config/vpn/client.crt")
-  private_key       = file("${path.module}/config/vpn/client.key")
-  certificate_chain = file("${path.module}/config/vpn/ca.crt")
+  count             = var.network_config.vpn.client_vpn.is_enabled ? 1 : 0
+  depends_on = [ null_resource.generate_certs ]
+  certificate_body  = fileexists("${path.root}/config/vpn/client.crt") ? file("${path.root}/config/vpn/client.crt") : ""
+  private_key       = fileexists("${path.root}/config/vpn/client.crt") ? file("${path.root}/config/vpn/client.key") : ""
+  certificate_chain = fileexists("${path.root}/config/vpn/client.crt") ? file("${path.root}/config/vpn/ca.crt") : ""
+  lifecycle { 
+    ignore_changes = [certificate_body, private_key, certificate_chain]
+  }
 }
 
 resource "aws_security_group" "vpn_security_group" {
@@ -269,13 +280,6 @@ resource "aws_ec2_client_vpn_endpoint" "client_vpn" {
     aws_acm_certificate.server_vpn_cert,
     aws_acm_certificate.client_vpn_cert
   ]
-
-  lifecycle {
-    precondition {
-      condition     = length(aws_acm_certificate.server_vpn_cert) > 0 && length(aws_acm_certificate.client_vpn_cert) > 0
-      error_message = "Please execute terraform-aws-networking/bin/run_generate_vpn_certs.sh prior to enabling the Client VPN for the first time."
-    }
-  }
 }
 
 resource "aws_ec2_client_vpn_network_association" "client_vpn_association_private" {
@@ -310,13 +314,13 @@ remote-cert-tls server
 cipher AES-256-GCM
 verb 3
 <ca>
-${file("${path.module}/config/vpn/ca.crt")}
+${fileexists("${path.root}/config/vpn/ca.crt") ? file("${path.module}/config/vpn/ca.crt") : ""}
 </ca>
 <cert>
-${file("${path.module}/config/vpn/client.crt")}
+${fileexists("${path.root}/config/vpn/server.crt") ? file("${path.module}/config/vpn/client.crt") : ""}
 </cert>
 <key>
-${file("${path.module}/config/vpn/client.key")}
+${fileexists("${path.root}/config/vpn/server.crt") ? file("${path.module}/config/vpn/client.key") : ""}
 </key>
 reneg-sec 0
 verify-x509-name server.vpn.local name

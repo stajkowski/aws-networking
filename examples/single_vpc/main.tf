@@ -133,7 +133,7 @@ locals {
       }
       vpn = {
         client_vpn = {
-          is_enabled = false
+          is_enabled = true
           vpn_protocol   = "udp"
           vpn_port       = 443
           client_cidr_block = "10.254.0.0/22"

@@ -37,5 +37,5 @@ terraform.rc
 .terraform.lock.hcl
 
 # Ignore vpn config
-/config/vpn/*
 *.ovpn
+*.crt
