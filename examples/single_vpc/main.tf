@@ -133,13 +133,14 @@ locals {
       }
       vpn = {
         client_vpn = {
-          is_enabled = true
+          is_enabled = false
           vpn_protocol   = "udp"
           vpn_port       = 443
           client_cidr_block = "10.254.0.0/22"
           vpc_connection = "webapp"
           target_network = "ipam_account_pool"
           # can restrict target network to ipam parent pool or specific vpc
+          ovpn_export_path = "${path.root}/config/vpn/client.ovpn"
         }
       }
       internet_monitor = {

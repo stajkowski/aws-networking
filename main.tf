@@ -202,30 +202,17 @@ module "aws-cw-internet-monitor" {
 
 # Create Client VPN Certs in ACM
 resource "aws_acm_certificate" "server_vpn_cert" {
-  count             = var.network_config.vpn.client_vpn.is_enabled ? 1 : 0
+  count             = var.network_config.vpn.client_vpn.is_enabled && fileexists("${path.module}/config/vpn/server.crt") ? 1 : 0
   certificate_body  = file("${path.module}/config/vpn/server.crt")
   private_key       = file("${path.module}/config/vpn/server.key")
   certificate_chain = file("${path.module}/config/vpn/ca.crt")
-
-  lifecycle {
-    precondition {
-      condition     = fileexists("${path.module}/config/vpn/server.crt")
-      error_message = "Please execute ./bin/run_generate_vpn_certs.sh prior to enabling the Client VPN."
-    }
-  }
 }
 
 resource "aws_acm_certificate" "client_vpn_cert" {
-  count             = var.network_config.vpn.client_vpn.is_enabled ? 1 : 0
+  count             = var.network_config.vpn.client_vpn.is_enabled && fileexists("${path.module}/config/vpn/client.crt") ? 1 : 0
   certificate_body  = file("${path.module}/config/vpn/client.crt")
   private_key       = file("${path.module}/config/vpn/client.key")
   certificate_chain = file("${path.module}/config/vpn/ca.crt")
-  lifecycle {
-    precondition {
-      condition     = fileexists("${path.module}/config/vpn/client.crt")
-      error_message = "Please execute ./bin/run_generate_vpn_certs.sh prior to enabling the Client VPN."
-    }
-  }
 }
 
 resource "aws_security_group" "vpn_security_group" {
@@ -282,16 +269,25 @@ resource "aws_ec2_client_vpn_endpoint" "client_vpn" {
     aws_acm_certificate.server_vpn_cert,
     aws_acm_certificate.client_vpn_cert
   ]
+
+  lifecycle {
+    precondition {
+      condition     = length(aws_acm_certificate.server_vpn_cert) > 0 && length(aws_acm_certificate.client_vpn_cert) > 0
+      error_message = "Please execute terraform-aws-networking/bin/run_generate_vpn_certs.sh prior to enabling the Client VPN for the first time."
+    }
+  }
 }
 
 resource "aws_ec2_client_vpn_network_association" "client_vpn_association_private" {
-  count                  = var.network_config.vpn.client_vpn.is_enabled ? length(module.aws-vpc[var.network_config.vpn.client_vpn.vpc_connection].private_subnet_ids) : 0
+  count                  = length(aws_ec2_client_vpn_endpoint.client_vpn) > 0 ? length(module.aws-vpc[var.network_config.vpn.client_vpn.vpc_connection].private_subnet_ids) : 0
+  depends_on = [ aws_ec2_client_vpn_endpoint.client_vpn ]
   client_vpn_endpoint_id = aws_ec2_client_vpn_endpoint.client_vpn[0].id
   subnet_id              = module.aws-vpc[var.network_config.vpn.client_vpn.vpc_connection].private_subnet_ids[count.index]
 }
 
 resource "aws_ec2_client_vpn_authorization_rule" "authorization_rule" {
-  count             = var.network_config.vpn.client_vpn.is_enabled ? 1 : 0
+  count             = length(aws_ec2_client_vpn_endpoint.client_vpn) > 0 ? 1 : 0
+  depends_on = [ aws_ec2_client_vpn_endpoint.client_vpn ]
   client_vpn_endpoint_id = aws_ec2_client_vpn_endpoint.client_vpn[0].id
   
   target_network_cidr    = can(lookup(var.network_config.vpcs, var.network_config.vpn.client_vpn.target_network)) ? module.aws-vpc[var.network_config.vpn.client_vpn.target_network].vpc_cidr_block : replace(var.network_config.vpn.client_vpn.target_network, "ipam_account_pool", var.parent_pool_cidr_block)
@@ -299,8 +295,9 @@ resource "aws_ec2_client_vpn_authorization_rule" "authorization_rule" {
 }
 
 resource "local_sensitive_file" "client_ovpn_config" {
-  count = var.network_config.vpn.client_vpn.is_enabled ? 1 : 0
-  filename = "${path.module}/config/vpn/client.ovpn"
+  count = length(aws_ec2_client_vpn_endpoint.client_vpn) > 0  ? 1 : 0
+  depends_on = [ aws_ec2_client_vpn_endpoint.client_vpn ]
+  filename = var.network_config.vpn.client_vpn.ovpn_export_path
   content = <<-EOT
 client
 dev tun

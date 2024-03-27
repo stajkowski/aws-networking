@@ -38,3 +38,4 @@ terraform.rc
 
 # Ignore vpn config
 /config/vpn/*
+*.ovpn

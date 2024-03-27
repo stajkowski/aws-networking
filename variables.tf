@@ -99,6 +99,7 @@ variable "network_config" {
           client_cidr_block = string
           vpc_connection = string
           target_network = string
+          ovpn_export_path = string
         })
       })
       internet_monitor = object({
