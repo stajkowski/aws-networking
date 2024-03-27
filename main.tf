@@ -197,3 +197,100 @@ module "aws-cw-internet-monitor" {
   aws_vpc                 = module.aws-vpc
 }
 
+
+
+
+# Create Client VPN Certs in ACM
+resource "aws_acm_certificate" "server_vpn_cert" {
+  count             = var.network_config.vpn.client_vpn.is_enabled ? 1 : 0
+  certificate_body  = file("${path.module}/config/vpn/server.crt")
+  private_key       = file("${path.module}/config/vpn/server.key")
+  certificate_chain = file("${path.module}/config/vpn/ca.crt")
+
+  lifecycle {
+    precondition {
+      condition     = fileexists("${path.module}/config/vpn/server.crt")
+      error_message = "Please execute ./bin/run_generate_vpn_certs.sh prior to enabling the Client VPN."
+    }
+  }
+}
+
+resource "aws_acm_certificate" "client_vpn_cert" {
+  count             = var.network_config.vpn.client_vpn.is_enabled ? 1 : 0
+  certificate_body  = file("${path.module}/config/vpn/client.crt")
+  private_key       = file("${path.module}/config/vpn/client.key")
+  certificate_chain = file("${path.module}/config/vpn/ca.crt")
+  lifecycle {
+    precondition {
+      condition     = fileexists("${path.module}/config/vpn/client.crt")
+      error_message = "Please execute ./bin/run_generate_vpn_certs.sh prior to enabling the Client VPN."
+    }
+  }
+}
+
+resource "aws_security_group" "vpn_security_group" {
+  count             = var.network_config.vpn.client_vpn.is_enabled ? 1 : 0
+  name   = "${var.project_name}-${var.environment}-vpn-sg"
+  vpc_id = module.aws-vpc[var.network_config.vpn.client_vpn.vpc_connection].vpc_id
+ 
+  ingress {
+   protocol         = "tcp"
+   from_port        = 443
+   to_port          = 443
+   cidr_blocks      = ["0.0.0.0/0"]
+   ipv6_cidr_blocks = ["::/0"]
+  }
+ 
+  egress {
+   protocol         = "-1"
+   from_port        = 0
+   to_port          = 0
+   cidr_blocks      = ["0.0.0.0/0"]
+   ipv6_cidr_blocks = ["::/0"]
+  }
+}
+
+resource "aws_ec2_client_vpn_endpoint" "client_vpn" {
+  count             = var.network_config.vpn.client_vpn.is_enabled ? 1 : 0
+  description            = "${var.project_name}-${var.environment}-client-vpn"
+  server_certificate_arn = aws_acm_certificate.server_vpn_cert[0].arn
+  client_cidr_block      = var.network_config.vpn.client_vpn.client_cidr_block
+  vpc_id                 = module.aws-vpc[var.network_config.vpn.client_vpn.vpc_connection].vpc_id
+  
+  security_group_ids     = [aws_security_group.vpn_security_group[0].id]
+  split_tunnel           = true
+
+  # Client authentication
+  authentication_options {
+    type                       = "certificate-authentication"
+    root_certificate_chain_arn = aws_acm_certificate.client_vpn_cert[0].arn
+  }
+
+  connection_log_options {
+    enabled = false
+  }
+
+  tags = {
+    key   = "Name",
+    value = "${var.project_name}-${var.environment}-client-vpn"
+  }
+
+  depends_on = [
+    aws_acm_certificate.server_vpn_cert,
+    aws_acm_certificate.client_vpn_cert
+  ]
+}
+
+resource "aws_ec2_client_vpn_network_association" "client_vpn_association_private" {
+  count                  = var.network_config.vpn.client_vpn.is_enabled ? length(module.aws-vpc[var.network_config.vpn.client_vpn.vpc_connection].private_subnet_ids) : 0
+  client_vpn_endpoint_id = aws_ec2_client_vpn_endpoint.client_vpn[0].id
+  subnet_id              = module.aws-vpc[var.network_config.vpn.client_vpn.vpc_connection].private_subnet_ids[count.index]
+}
+
+resource "aws_ec2_client_vpn_authorization_rule" "authorization_rule" {
+  count             = var.network_config.vpn.client_vpn.is_enabled ? 1 : 0
+  client_vpn_endpoint_id = aws_ec2_client_vpn_endpoint.client_vpn[0].id
+  
+  target_network_cidr    = can(lookup(var.network_config.vpcs, var.network_config.vpn.client_vpn.target_network)) ? module.aws-vpc[var.network_config.vpn.client_vpn.target_network].vpc_cidr_block : replace(var.network_config.vpn.client_vpn.target_network, "ipam_account_pool", var.parent_pool_cidr_block)
+  authorize_all_groups   = true
+}
