@@ -232,6 +232,7 @@ resource "aws_security_group" "vpn_security_group" {
   count             = var.network_config.vpn.client_vpn.is_enabled ? 1 : 0
   name   = "${var.project_name}-${var.environment}-vpn-sg"
   vpc_id = module.aws-vpc[var.network_config.vpn.client_vpn.vpc_connection].vpc_id
+  description = "Allow inbound traffic from port 443, to the VPN"
  
   ingress {
    protocol         = "tcp"
@@ -257,6 +258,9 @@ resource "aws_ec2_client_vpn_endpoint" "client_vpn" {
   client_cidr_block      = var.network_config.vpn.client_vpn.client_cidr_block
   vpc_id                 = module.aws-vpc[var.network_config.vpn.client_vpn.vpc_connection].vpc_id
   
+  transport_protocol = var.network_config.vpn.client_vpn.vpn_protocol
+  vpn_port = var.network_config.vpn.client_vpn.vpn_port
+
   security_group_ids     = [aws_security_group.vpn_security_group[0].id]
   split_tunnel           = true
 
@@ -271,8 +275,7 @@ resource "aws_ec2_client_vpn_endpoint" "client_vpn" {
   }
 
   tags = {
-    key   = "Name",
-    value = "${var.project_name}-${var.environment}-client-vpn"
+    Name = "${var.project_name}-${var.environment}-client-vpn"
   }
 
   depends_on = [

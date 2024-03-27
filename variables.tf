@@ -94,6 +94,8 @@ variable "network_config" {
       vpn = object({
         client_vpn = object({
           is_enabled = bool
+          vpn_protocol = string
+          vpn_port = number
           client_cidr_block = string
           vpc_connection = string
           target_network = string
