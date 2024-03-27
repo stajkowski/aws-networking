@@ -297,3 +297,31 @@ resource "aws_ec2_client_vpn_authorization_rule" "authorization_rule" {
   target_network_cidr    = can(lookup(var.network_config.vpcs, var.network_config.vpn.client_vpn.target_network)) ? module.aws-vpc[var.network_config.vpn.client_vpn.target_network].vpc_cidr_block : replace(var.network_config.vpn.client_vpn.target_network, "ipam_account_pool", var.parent_pool_cidr_block)
   authorize_all_groups   = true
 }
+
+resource "local_sensitive_file" "client_ovpn_config" {
+  count = var.network_config.vpn.client_vpn.is_enabled ? 1 : 0
+  filename = "${path.module}/config/vpn/client.ovpn"
+  content = <<-EOT
+client
+dev tun
+proto ${var.network_config.vpn.client_vpn.vpn_protocol}
+remote ${replace(aws_ec2_client_vpn_endpoint.client_vpn[0].dns_name,"*.","")} ${var.network_config.vpn.client_vpn.vpn_port}
+remote-random-hostname
+resolv-retry infinite
+nobind
+remote-cert-tls server
+cipher AES-256-GCM
+verb 3
+<ca>
+${file("${path.module}/config/vpn/ca.crt")}
+</ca>
+<cert>
+${file("${path.module}/config/vpn/client.crt")}
+</cert>
+<key>
+${file("${path.module}/config/vpn/client.key")}
+</key>
+reneg-sec 0
+verify-x509-name server.vpn.local name
+EOT
+}
