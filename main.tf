@@ -11,6 +11,7 @@
 # 3. Create Internet Gateway, NAT Gateway, VPCE Gateway, or VPC Interface Endpoints
 # 4. Create Transit Gateway, Attach VPCs, and update VPC Route Tables
 # 5. Create Internet Monitor
+# 6. Create Client VPN
 #
 # ---------------------------------------------------------------------------------------------------------------------
 
@@ -195,3 +196,4 @@ module "aws-cw-internet-monitor" {
   internet_monitor_config = var.network_config.internet_monitor
   aws_vpc                 = module.aws-vpc
 }
+

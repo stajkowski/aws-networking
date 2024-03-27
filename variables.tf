@@ -91,6 +91,14 @@ variable "network_config" {
           vpc_attachment = string
         }))
       })
+      vpn = object({
+        client_vpn = object({
+          is_enabled = bool
+          client_cidr_block = string
+          vpc_connection = string
+          target_network = string
+        })
+      })
       internet_monitor = object({
         is_enabled                    = bool
         monitor_vpcs                  = list(string)

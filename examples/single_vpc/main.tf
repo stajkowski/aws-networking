@@ -131,6 +131,15 @@ locals {
         tgw_vpc_attach = []
         tgw_routes     = []
       }
+      vpn = {
+        client_vpn = {
+          is_enabled = true
+          client_cidr_block = "10.254.0.0/22"
+          vpc_connection = "webapp"
+          target_network = "ipam_account_pool"
+          # can restrict target network to ipam parent pool or specific vpc
+        }
+      }
       internet_monitor = {
         is_enabled                    = true
         monitor_vpcs                  = ["webapp"]
